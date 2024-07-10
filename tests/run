@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+FILES=""
+
+function hr {
+	echo "------------------------------"
+}
+
+function crawl {
+	local DIR=$1
+	for entry in $(ls $DIR); do
+		local path=$DIR/$entry
+		if [ -d $path ]; then
+			crawl $path
+		elif [ -f $path ] && [[ $path = *.test.js ]]; then
+			FILES="$FILES $path"
+		fi
+	done
+}
+
+crawl . #$(pwd)
+
+for file in $FILES; do
+	echo
+	hr
+	echo $file
+	hr
+	bun test $file
+done
+
