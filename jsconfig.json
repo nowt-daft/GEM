@@ -1,11 +1,14 @@
 {
+  "exclude": ["gem-lsp"],
   "compilerOptions": {
+    "plugins": [{
+        "name": "gem-lsp"
+    }],
     // Enable latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
     "allowJs": true,
 
     // Bundler mode
@@ -16,7 +19,7 @@
 
     // Best practices
     "strict": true,
-    "skipLibCheck": true,
+    //"skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags (disabled by default)

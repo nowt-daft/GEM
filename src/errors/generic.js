@@ -10,7 +10,7 @@ export default class GenericError extends Error {
 		cause
 	) {
 		super(
-			`\n\n🥴${ name }:\n${ description }\n\n`,
+			`\n\n🥴 ${ name }:\n${ description }\n\n`,
 			{ cause }
 		);
 	}

@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "ESNEXT",
+		"module": "nodenext",
+		//"moduleDetection": "force",
+
+		//"allowJs": true,
+		"rootDir": "src",
+
+		"outDir": "out",
+
+		"strict": true,
+		"skipLibCheck": true
+	}
+}

@@ -1,14 +1,12 @@
-/**
- * @property  {boolean}  enumerable
- * @property  {boolean}  configurable
- */
 export default class Descriptor {
+	/** @type {boolean} */
 	enumerable = false;
+	/** @type {boolean} */
 	configurable = true;
 
 	/**
-	 * @param {boolean} enumerable Is the property visibile when iterating over object?
-	 * @param {boolean} [configurable=true] Can we reconfigure the property?
+	 * @param {boolean} enumerable    Is property visibile when iterating?
+	 * @param {boolean} configurable  Can we reconfigure the property?
 	 */
 	constructor(
 		enumerable,

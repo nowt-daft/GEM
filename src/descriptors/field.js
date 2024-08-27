@@ -78,7 +78,9 @@ export class Field extends MetaDescriptor {
 }
 
 /**
+ * @template T
  * @param    {new => T}  type
- * @returns  {Field<T>}  this
+ * @returns  {Field<T>}  new Field
  */
 export default type => new Field(type);
+

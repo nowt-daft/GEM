@@ -1,0 +1,10 @@
+{
+  "name": "gem-lsp",
+  "main": "out/index.js",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

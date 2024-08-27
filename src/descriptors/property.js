@@ -1,18 +1,19 @@
 import Descriptor from "./descriptor.js";
 
 /**
- * @property  {boolean}  writable
- * @property  {any}      value
+ * @template T
  */
 export default class Property extends Descriptor {
+	/** @type {boolean} */
 	writable = false;
+	/** @type {T} */
 	value = undefined;
 
 	/**
-	 * @param {any} value The value the property has
-	 * @param {boolean} writable
-	 * @param {boolean} enumerable
-	 * @param {boolean} [configurable=true]
+	 * @param  {T}        value  The value the property has
+	 * @param  {boolean}  writable
+	 * @param  {boolean}  enumerable
+	 * @param  {boolean}  configurable
 	 */ 
 	constructor(
 		value,
@@ -34,9 +35,9 @@ export default class Property extends Descriptor {
 	}
 	
 	/**
-	 * @param   {any} value
-	 * @param   {boolean} enumerable
-	 * @param   {boolean} [configurable=true]
+	 * @param   {T}        value
+	 * @param   {boolean}  enumerable
+	 * @param   {boolean}  configurable
 	 *
 	 * @returns {FixedProperty} Property whose value CANNOT be changed.
 	 */
@@ -53,9 +54,9 @@ export default class Property extends Descriptor {
 	}
 
 	/**
-	 * @param   {any} value
-	 * @param   {boolean} enumerable
-	 * @param   {boolean} [configurable=true]
+	 * @param   {T}        value
+	 * @param   {boolean}  enumerable
+	 * @param   {boolean}  configurable
 	 *
 	 * @returns {VariableProperty} Property whose value is rewritable.
 	 */
@@ -72,11 +73,15 @@ export default class Property extends Descriptor {
 	}
 }
 
+/**
+ * @template T
+ * @extends Property<T>
+ */
 export class FixedProperty extends Property {
 	/**
-	 * @param {any} value
-	 * @param {boolean} enumerable
-	 * @param {boolean} [configurable=true]
+	 * @param  {T}        value
+	 * @param  {boolean}  enumerable
+	 * @param  {boolean}  configurable
 	 *
 	 */
 	constructor(
@@ -93,11 +98,15 @@ export class FixedProperty extends Property {
 	}
 }
 
+/**
+ * @template T
+ * @extends Property<T>
+ */
 export class VariableProperty extends Property {
 	/**
-	 * @param {any} value
-	 * @param {boolean} enumerable
-	 * @param {boolean} [configurable=true]
+	 * @param  {T}        value
+	 * @param  {boolean}  enumerable
+	 * @param  {boolean}  configurable
 	 */
 	constructor(
 		value,

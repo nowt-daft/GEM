@@ -2,45 +2,55 @@ import { map } from '../types/object.js';
 import Descriptor from './descriptor.js';
 import { FixedProperty, VariableProperty } from './property.js';
 
+/**
+ * @typedef {string|symbol} Key
+ */
+/**
+ * @typedef {Record<Key,any>} Dictionary
+ */
+/**
+ * @typedef {FixedProperty|VariableProperty} Property
+ */
+/**
+ * @typedef {Record<Key,Property>} PropertyDescriptors
+ */
+
 export default class Properties {
 	/**
-	 * @param {object}  properties  A dictionary of Key-Value pairs
-	 * @param {boolean} enumerable
-	 * @param {FixedProperty|VariableProperty} descriptor
+	 * @param   {Dictionary}       properties  A dictionary of Key-Value pairs
+	 * @param   {boolean}          enumerable
+	 * @param   {new => Property}  descriptor
+	 * @returns {PropertyDescriptors}  A dictionary of property descriptors
 	 */
-	constructor(
+	static create(
 		properties,
 		enumerable,
 		descriptor
 	) {
-		Object.assign(
-			this,
-			map(
-				properties,
-				(key, value) => [
-					key,
-					value instanceof Descriptor ?
-						value :
-						new descriptor(
-							value,
-							enumerable
-						)
-				]
-			)
+		return map(
+			properties,
+			(key, value) => [
+				key,
+				value instanceof Descriptor ?
+					value :
+					new descriptor(
+						value,
+						enumerable
+					)
+			]
 		);
 	}
 
 	/**
-	 * @param    {object}  properties  A dictionary of Key-Value pairs
-	 * @param    {boolean} enumerable
-	 *
-	 * @returns  {Properties}  An object of Property Descriptors
+	 * @param    {Dictionary}  properties  A dictionary of Key-Value pairs
+	 * @param    {boolean}     enumerable
+	 * @returns  {PropertyDescriptors}  An object of Property Descriptors
 	 */
 	static fixed(
 		properties,
 		enumerable
 	) {
-		return new Properties(
+		return Properties.create(
 			properties,
 			enumerable,
 			FixedProperty
@@ -48,16 +58,15 @@ export default class Properties {
 	}
 
 	/**
-	 * @param    {object}  properties  A dictionary of Key-Value pairs
-	 * @param    {boolean} enumerable
-	 *
-	 * @returns  {Properties}  An object of Property Descriptors
+	 * @param    {Dictionary}  properties  A dictionary of Key-Value pairs
+	 * @param    {boolean}     enumerable
+	 * @returns  {PropertyDescriptors}  An object of Property Descriptors
 	 */
 	static variable(
 		properties,
 		enumerable
 	) {
-		return new Properties(
+		return Properties.create(
 			properties,
 			enumerable,
 			VariableProperty

@@ -9,7 +9,7 @@ const ARROW = '=>';
  * @param   {function} func
  * @returns {string}
  */
-const parse_args = func => {
+export const parse_args = func => {
 	const source = func.toString();
 	
 	let start = source.indexOf(LP);
@@ -86,7 +86,27 @@ const TAGGERS = {
 			),
 };
 
+/**
+ * @param    {any}     value
+ * @returns  {string}  Representation of the value based on its type.
+ */
 export const tagify = value => TAGGERS?.[typeof value](value) ?? 'UNKNOWN';
+
+/**
+ * This is a string template function.
+ *
+ * @example
+ * import { tag } from './tagify.js';
+ *
+ * const value = "Hello, World";
+ * console.log(
+ *   tag`Value is ${ value } and is a ${ value.constructor }`
+ * );
+ *
+ * @param    {string[]}  parts
+ * @param    {...any}    The values to be rendered between each part.
+ * @returns  {string}    Rendered template string.
+ */
 export const tag = (parts, ...args) => {
 	let output = parts[0];
 	args.forEach(
@@ -97,4 +117,5 @@ export const tag = (parts, ...args) => {
 	);
 	return output;
 }
+
 export default tagify;

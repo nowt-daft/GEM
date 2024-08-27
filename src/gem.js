@@ -7,11 +7,57 @@ import ClassDescriptor from "./descriptors/class.js";
 import MetaTypeError from "./errors/metatype.js";
 import AbstractError from "./errors/abstract.js";
 
+export { default as Field } from "./descriptors/field.js";
+
 import bootstrap from "./misc/bootstrap.js";
 
-const STATIC = {
+/**
+ * @mixin
+ */
+export const STATIC = {
 	expression: /.*/i,
-	static(properties = {}, enumerable = false) {
+	/**
+	 * @param    {string}  string
+	 * @returns  {boolean}
+	 */
+	validate(string) {
+		return this.expression.test(string);
+	},
+	/**
+	 * @param    {string}  string
+	 * @returns  {object}  Constructed instance of type based-on string
+	 */
+	parse(string) {
+		return new this(string);
+	},
+	/**
+	 * @param    {object}  instance
+	 * @returns  {string}  string representation of the instance
+	 */
+	stringify(instance) {
+		return `${ instance }`;
+	},
+
+	/**
+	 * How do we serialise the instance into JSON? By default,
+	 * We leave it untouched.
+	 *
+	 * @param   {object}  instance
+	 * @returns {any}
+	 */
+	serialise(instance) {
+		return instance;
+	},
+
+	/**
+	 * @param   {object}   properties
+	 * @param   {boolean}  enumerable
+	 * @returns {object}   this
+	 */
+	static(
+		properties,
+		enumerable = false
+	) {
 		return Object.defineProperties(
 			this,
 			Properties.fixed(
@@ -20,24 +66,57 @@ const STATIC = {
 			)
 		);
 	},
-	parse(string) {
-		return new this(string);
+
+	/**
+	 * @param    {any}     value
+	 * @returns  {boolean} Is the value an instance or descendent of this class?
+	 */
+	defines(value) {
+		return is.of_type(value, this);
 	},
-	stringify(instance) {
-		return `${ instance }`;
-	},
-	validate(string) {
-		return this.expression.test(string);
-	},
-	defines(instance) {
-		return is.of_type(instance, this);
-	},
+	/**
+	 * Metaprogramming -> hooks into "instanceof" keyword
+	 * @example
+	 * 43 instanceof Number
+	 *
+	 * @returns  {boolean}
+	 */
 	[Symbol.hasInstance](instance) {
 		return is.string(instance) ?
 			this.validate(instance) :
 			this.defines(instance);
 	}
-};
+}
+
+/**
+ * @callback ConstructorFormatter
+ * @param    {string}  name  Name of the class/type.
+ * @param    {ClassDescriptor}  descriptor  Info about type (parents, properties, etc.)
+ * @returns  {class}  Factory that builds types/constructors/classes.
+ */
+
+/**
+ * @callback Name
+ * @param    {object}  descriptor
+ * @param    {class[]} descriptor.parents
+ * @param    {object}  descriptor.prescriptor
+ * @returns  {string}  name to assign
+ */
+
+/**
+ * If name is absent, there must be at least TWO parents; OR, at least ONE
+ * parent and ONE definition; OR, ONE definition.
+ *
+ * If parents are absent, there must be ONE definition. Name is optional.
+ *
+ * If definition is absent, there must be at least TWO parents.
+ *
+ * @callback TypeConstructor
+ * @param    {string|Name}    name  Name for the Type/Class to have
+ * @param    {...new object}  parents  Any parent types to extend/inherit.
+ * @param    {object}         definition  Properties, methods, listeners, etc.
+ * @returns  {class}          A constructor/class.
+ */
 
 class Constructor {
 	/**
@@ -121,38 +200,6 @@ class Constructor {
 }
 
 /**
- * @callback ConstructorFormatter
- *
- * @param    {string}  name  Name of the class/type.
- * @param    {{parents:class[],listeners:object,prescriptor:object}: ClassDescriptor}
- *            descriptor  Info about type (parents, properties, etc.)
- * @returns  {class}  Constructor that builds types which, in turn, construct objects.
- */
-
-/**
- * @callback Name
- * @param    {object}  descriptor
- * @param    {class[]} descriptor.parents
- * @param    {object}  descriptor.prescriptor
- * @returns  {string}  name to assign
- */
-
-/**
- * If name is absent, there must be at least TWO parents; OR, at least ONE
- * parent and ONE definition; OR, ONE definition.
- *
- * If parents are absent, there must be ONE definition. Name is optional.
- *
- * If definition is absent, there must be at least TWO parents.
- *
- * @callback TypeConstructor
- * @param    {string|Name}  name  Name for the Type/Class to have
- * @param    {...Function}  parents  Any parent types to extend/inherit.
- * @param    {object}       definition  Properties, methods, listeners, etc.
- * @returns  {class} A constructor/class.
- */
-
-/**
  * A factory for producing MetaTypes (types of types)
  * @function MetaType
  *
@@ -171,7 +218,7 @@ export function MetaType(
 		throw new MetaTypeError(meta_name);
 
 	/** @type {TypeConstructor} */
-	const Type = {
+	const TypeBuilder = {
 		[meta_name]: function(
 			name,
 			...prescriptors
@@ -193,7 +240,7 @@ export function MetaType(
 				is.class(name) ||
 				is.object_literal(name)
 			) {
-				return Type(
+				return TypeBuilder(
 					meta_name,
 					name,
 					...prescriptors
@@ -207,7 +254,9 @@ export function MetaType(
 				prototype,
 				defaults,
 				listeners
-			} = new ClassDescriptor(...prescriptors);
+			} = new ClassDescriptor(
+				...prescriptors
+			);
 
 			const constructor =
 				constructor_format(
@@ -248,7 +297,7 @@ export function MetaType(
 							...constructor.listeners ?? {},
 							...listeners
 						},
-						constructor: Type,
+						constructor: TypeBuilder,
 					},
 					false
 				)
@@ -262,17 +311,19 @@ export function MetaType(
 				)
 			);
 
-			// Has the new keyword been used on Type?  Special case but has uses...
 			return is.global(this) ? constructor : init(this, constructor);
 		}
 	}[meta_name];
 
 	/** @type {TypeConstructor} */
-	return Object.assign(
-		Type(Type), // Typify ourselves!
-		{
-			constructor: MetaType
-		}
+	return Object.defineProperties(
+		TypeBuilder(TypeBuilder), // Typify ourselves!
+		Properties.fixed(
+			{
+				constructor: MetaType
+			},
+			false
+		)
 	);
 }
 
@@ -293,13 +344,13 @@ export function MetaType(
  *
  * @callback GenericType
  *
- * @param    {...Function}  parents
- * @param    {object}       definition
- * @returns  {class}  Newly constructed class/type.
+ * @param    {...new object}  parents
+ * @param    {object}         definition
+ * @returns  {class}          Newly constructed class/type.
  */
 /** @type {GenericType} */
-export const Type = MetaType(
-	"Type",
+export const Compose = MetaType(
+	"Composition",
 	name => Constructor.Class(name)
 );
 
@@ -358,8 +409,8 @@ export const Abstract = MetaType(
  *
  * @callback ModelType
  *
- * @param    {...Function}  [parents]
- * @param    {object}       definition
+ * @param    {...new object} [parents]
+ * @param    {object}        definition
  * @returns  {class}  Newly constructed class/type.
  */
 /** @type {ModelType} */
@@ -388,8 +439,8 @@ export const Model = MetaType(
  *
  * @callback SourceType
  *
- * @param    {...Function}  parents
- * @param    {object}       definition
+ * @param    {...new object} parents
+ * @param    {object}        definition
  * @returns  {class}  Newly constructed class/type.
  */
 /** @type {SourceType} */
@@ -442,7 +493,7 @@ export const Interface = MetaType(
 );
 
 bootstrap.forEach(
-	([type, statics]) =>
-		Type(type).static(statics)
+	([type, statics = {}]) =>
+		Compose(type).static(statics)
 );
 

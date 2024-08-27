@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source setenv
+
+TARGET=${1:-"."}
+$BUN run ./src/misc/build.js $TARGET

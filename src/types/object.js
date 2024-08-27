@@ -1,12 +1,23 @@
 import is from "../utils/is.js";
 import tagify from "../utils/tagify.js";
+
 import UndefinedPropertyError from "../errors/undefined.js";
 import RequiredPropertyError from "../errors/required.js";
 
 /**
+ * @typedef {string|symbol}  Key
+ */
+/**
+ * @typedef {[Key, any]}     KeyValuePair
+ */
+/**
+ * @typedef {KeyValuePair[]} Entries
+ */
+
+/**
  * Object concatenation of the form A + B + ... + C = D
  * @param    {...object} objects Dictionary/Objects we wish to amalgamate
- * @returns  {object} The NEW Object.
+ * @returns  {object}    The NEW Object.
  */
 export const concat = Object.concat =
 	(...objects) =>
@@ -20,8 +31,8 @@ export const concat = Object.concat =
  * Get an Array of Key-Value pairs from an Object's properties/values.
  * This includes both ENUMERABLE and INNUMERABLE properties as well as
  * properties with SYMBOLS as Keys.
- * @param    {object} object
- * @returns  {[string|symbol, any][]} Array of Key-Value pairs
+ * @param    {object}  object
+ * @returns  {Entries} Array of Key-Value pairs
  */
 export const all_entries = Object.all_entries =
 	object => [
@@ -37,8 +48,8 @@ export const all_entries = Object.all_entries =
 
 /**
  * @callback ModifyCallback
- * @param    {[string|symbol, any][]} entries Array of Key-Value pairs
- * @returns  {[string|symbol, any][]} Array of Key-Value pairs
+ * @param    {Entries} entries Array of Key-Value pairs
+ * @returns  {Entries} Array of Key-Value pairs
  */
 
 /**
@@ -62,15 +73,15 @@ export const modify = Object.modify =
 
 /**
  * @callback ForEach
- * @param    {string|symbol} key
- * @param    {any} value
- * @returns  {undefined} VOID
+ * @param    {Key}  key
+ * @param    {any}  value
+ * @returns  {void}
  */
 /**
  * Simple Object iterator which leaves target object unmodified.
- * @param    {object} object
+ * @param    {object}  object
  * @param    {ForEach} foreach
- * @returns  {object} NEW Object
+ * @returns  {object}  NEW Object
  */
 export const forEach = Object.forEach =
 	(
@@ -89,9 +100,9 @@ export const forEach = Object.forEach =
 
 /**
  * @callback Mapper
- * @param    {string|symbol} key
+ * @param    {Key} key
  * @param    {any} value
- * @returns  {[string|symbol, any]} Key-Value pair
+ * @returns  {KeyValuePair} Key-Value pair
  */
 /**
  * Map target object into a NEW Object.
@@ -115,7 +126,7 @@ export const map = Object.map =
 
 /**
  * @callback Filter
- * @param    {string|symbol} key
+ * @param    {Key} key
  * @param    {any} value
  * @returns  {boolean} TRUE => keep Key-Value pair; FALSE => discard Key-Value pair
  */
@@ -141,9 +152,9 @@ export const filter = Object.filter =
 
 /**
  * @callback Sort
- * @param    {string|symbol} key
- * @param    {any} value
- * @returns  {number} index to place Key-Value pair.
+ * @param    {Key}     key
+ * @param    {any}     value
+ * @returns  {number}  index to place Key-Value pair.
  */
 /**
  * Sort the Key-Value pairs of an Object into different "buckets" as NEW Objects.
@@ -168,10 +179,10 @@ export const filter = Object.filter =
  *             typeof value === 'function' ? 1 : 0;
  *     );
  *
- * @param    {object} object
- * @param    {Sort} sorter
+ * @param    {object}       object
+ * @param    {Sort}         sorter
  * @param    {number|Array} [buckets=[]] Either the number of buckets or an Array
- * @returns  {object[]} Array of Objects organised into their respective "buckets"
+ * @returns  {object[]}     Array of records organised into "buckets"
  */
 export const sort = Object.sort =
 	(
@@ -211,36 +222,62 @@ export const sort = Object.sort =
  * By default, any properties named 'constructor' or '__proto__'
  * are ignored.
  *
- * @param    {object} object
- * @param    {string[]} [ignore_list=[]]
- * @returns  {object} A view of all object's properties except those in the ignore_list
+ * @param    {object}   object
+ * @param    {string[]} ignore_list
+ * @returns  {object}   A view of all object's properties except those in the ignore_list
  */
 export const view = Object.view =
 	(
 		object,
 		ignore_list = []
-	) =>
+	) => {
 		ignore_list = [
-			'constructor',
 			'__proto__',
-			'init', // TODO: Keep?
+			'constructor',
+			// 'init', keep??
+			'inherit',
+			'super',
 			...ignore_list
-		] &&
-		filter(
+		];
+		return filter(
 			object,
-			(key) =>
-				!ignore_list.includes(key)
+			key => !ignore_list.includes(key)
 		);
+	}
 
+/**
+ * Retrieve object of ALL methods defined or inherited on type.
+ *
+ * This function is recursive.  Please DO NOT pass in a second argument
+ * as it is used to manage the state of the operation.
+ *
+ * @param    {class}  type
+ * @returns  {Record<Key,Function>}  Dictionary of methods
+ */
+export const view_prototype = Object.view_prototype =
+	(type, output = []) => {
+		output = [
+			...Object.entries(
+				view(type.prototype)
+			),
+			...output
+		];
+
+		if (type.__proto__ === Object.__proto__)
+			return Object.fromEntries(output);
+
+		return view_prototype(type.__proto__, output);
+	}
 
 /**
  * If the prototype DOES NOT have an init method, we assume each argument in
  * ...args is an Object of Key-Value pairs to assign to the target object.
  *
+ * @template {class}   T
  * @param    {object}  target
- * @param    {class}   type  The type from which the target Initialises.
+ * @param    {new T}   type  The type from which the target initialises.
  * @param    {...any}  args  Any arguments or Key-Value objects to assign.
- * @returns  {object}  The target object intitialised by the type.
+ * @returns  {T}  The target object intitialised by the type.
  */
 export const init = Object.init =
 	(
@@ -271,9 +308,10 @@ export const init = Object.init =
  *
  * Pass a second argument (type) to verify a raw object against that type.
  *
- * @param    {object} target Instance to validate
- * @param    {class}      type   Type, class, or other constructable
- * @returns  {object}        Target object if all tests pass.
+ * @template {class}  T
+ * @param    {object} target  Instance to validate
+ * @param    {new T}  [type=target.constructor]  Type/class/constructable
+ * @returns  {object} Target object if all tests pass.
  *
  * @throws   {UndefinedPropertyError}
  * @throws   {RequiredPropertyError}
@@ -325,11 +363,12 @@ export const verify = Object.verify =
  * If target's constructor's prototype does not have an init method,
  * arguments will be treated as a list of Key-Value objects.
  *
- * @param    {object} target
- * @param    {...any} args
- * @returns  {object}  The modified target object
+ * @template T
+ * @param    {object}  target
+ * @param    {...any}  args
+ * @returns  {T} The modified target object
  */
-export const construct = Object.construct =
+export const build = Object.build =
 	(
 		target,
 		...args
@@ -341,24 +380,37 @@ export const construct = Object.construct =
 			defaults = {}
 		} = type;
 
-		return (
-			verify(
-				init(
-					Object.assign(
-						Object.defineProperties(
-							target,
-							properties
-						),
-						defaults
-					),
-					type,
-					...args
-				)
-			)
+		return init(
+			Object.assign(
+				Object.defineProperties(
+					target,
+					properties
+				),
+				defaults
+			),
+			type,
+			...args
+		);
+	}
+
+/**
+ * Same as {@link build} but the Object is then
+ * verified with {@link verify}.
+ *
+ * @template T
+ * @param    {object}  target
+ * @param    {...any}  args
+ * @returns  {T}       The modified target object
+ */
+export const construct = Object.construct =
+	(
+		target,
+		...args
+	) => {
+		return verify(
+			build(target, ...args)
 		);
 	};
-
-
 
 Object.assign(
 	Object.prototype,

@@ -1,18 +1,18 @@
 import MetaDescriptor from "../meta.js";
-
+import AttributeEvent from "../../types/events/attribute.js";
 
 /**
  * @template T
  * @callback AttributeChange
  *
- * @param    {object} data
- * @param    {object} data.target  Object on which the property's value changed.
- * @param    {string} data.key     The key of the property.
- * @param    {new T}  data.type    The type <T> of the property.
- * @param    {T}      data.from    The previous value of the property.
- * @param    {T}      data.to      The new value of the property.
+ * @param    {object}   data
+ * @param    {object}   data.target  Object on which the property's value changed.
+ * @param    {string}   data.key     The key of the property.
+ * @param    {new => T} data.type    The type <T> of the property.
+ * @param    {T}        data.from    The previous value of the property.
+ * @param    {T}        data.to      The new value of the property.
  *
- * @returns  {T}      Pass or override { to: type } value back from function.
+ * @returns  {T}        Pass or override { to: type } value back from function.
  */
 
 /**
@@ -22,8 +22,8 @@ import MetaDescriptor from "../meta.js";
  */
 export class Attribute extends MetaDescriptor {
 	/**
-	 * @param  {class}           type
-	 * @param  {AttributeChange} [onchange]
+	 * @param  {class}              type
+	 * @param  {AttributeChange<T>} [onchange]
 	 */
 	constructor(
 		type,
@@ -46,11 +46,23 @@ export class Attribute extends MetaDescriptor {
 			({ target, key, type, from, to }) => {
 				onchange?.({ target, key, type, from, to });
 				target.dispatch(
-					`attr:${ key }`,
-					{ target, key, type, from, to},
-					false
+					new AttributeEvent(
+						target,
+						key,
+						type,
+						from,
+						to
+					)
 				);
 			}
 		);
 	}
 }
+
+/**
+ * @template T
+ * @param    {new => T}            type
+ * @param    {AttributeChange<T>}  onchange
+ * @returns  {Attribute<T>}  new Attribute
+ */
+export default (type, onchange) => new Attribute(type, onchange);
