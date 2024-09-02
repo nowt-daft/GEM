@@ -317,8 +317,8 @@ function main(
 
 		const files = crawl(
 			join(
-				process.env.PROJECT_DIR,
-				'/src'
+				import.meta.dir, // -> <REPO>/src/misc
+				'../' // -> <REPO>/src
 			)
 		);
 

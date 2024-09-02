@@ -1,6 +1,6 @@
 /*
  💎 GEM :: DEFINITION FILE
- 🗐 This file was generated on Fri Aug 30 2024 13:24:54 GMT+0100 (British Summer Time).
+ 🗐 This file was generated on Mon Sep 02 2024 02:03:30 GMT+0100 (British Summer Time).
  ⚠ DO NOT TAMPER WITH THIS FILE AS CHANGES WILL BE LOST.
 */
 import Accessor from "./descriptors/accessor.js";
