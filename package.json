@@ -2,6 +2,9 @@
   "name": "gem",
   "module": "index.js",
   "type": "module",
+  "scripts": {
+    "postinstall": "echo TODO"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "gem-lsp": "file:./gem-lsp"

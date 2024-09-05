@@ -1,6 +1,6 @@
 /*
  💎 GEM :: DEFINITION FILE
- 🗐 This file was generated on Mon Sep 02 2024 02:03:30 GMT+0100 (British Summer Time).
+ 🗐 This file was generated on Thu Sep 05 2024 12:11:35 GMT+0100 (British Summer Time).
  ⚠ DO NOT TAMPER WITH THIS FILE AS CHANGES WILL BE LOST.
 */
 import Accessor from "./descriptors/accessor.js";
@@ -8,6 +8,7 @@ import Getter from "./descriptors/getter.js";
 import { Model } from "./gem.js";
 
 declare class Model {
+	poop: Number;
 	private _state: String;
 	private _is_thingied: Boolean;
 	property: Number;

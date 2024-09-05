@@ -3,4 +3,4 @@
 source setenv
 
 TARGET=${1:-"."}
-$BUN run ./src/misc/build.js $TARGET
+$BUN_RUNTIME run ./src/misc/build.js $TARGET

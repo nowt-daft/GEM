@@ -4,6 +4,7 @@ import { Model } from "./gem.js";
 
 export default class Thing extends Model(
 	{
+		poop: Number,
 		_state: String,
 		_is_thingied: Boolean,
 		property: 42,
