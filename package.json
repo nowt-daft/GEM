@@ -8,5 +8,10 @@
   },
   "peerDependencies": {
     "typescript": "^5.5.4"
-  }
+  },
+  "dependencies": {
+    "jst": "github:nowt-daft/jst",
+    "termite": "github:nowt-daft/termite"
+  },
+  "trustedDependencies": ["jst"]
 }
