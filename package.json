@@ -3,7 +3,7 @@
   "module": "index.js",
   "type": "module",
   "scripts": {
-    "postinstall": "echo TODO"
+    "postinstall": "bun run src/misc/plugin.js && mkdir -p ../@types/gem && cp -r @types/* ../@types/gem/"
   },
   "devDependencies": {
     "@types/bun": "latest",

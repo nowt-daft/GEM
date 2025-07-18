@@ -21,7 +21,8 @@ export default class Entry extends Model({
 	 * Like patch in a RESTful API. Pass the data you wish
 	 * to change.
 	 *
-	 * @param  {object}  data  Data to update on the Entry.
+	 * @param    {object}  data  Data to update on the Entry.
+	 * @returns  {Entry}   this
 	 */
 	update(data) {
 		return Object.assign(
@@ -38,6 +39,21 @@ export default class Entry extends Model({
 		return this.valueOf();
 	}
 
+	/**
+	 * This method allows Entries to be SOFT COMPARED.
+	 *
+	 * @example
+	 * console.log(entryA == otherEntry);
+	 * // TRUE if their IDs match and belong to the same "table"/schema
+	 * 
+	 * console.log(+entry);
+	 * // This will print the entry's ID.
+	 *
+	 * console.log(`${ entry }`);
+	 * // => "User[43]"
+	 *
+	 * @returns  {string}
+	 */
 	valueOf() {
 		return `${ this.constructor.name }[${ this.id }]`;
 	}

@@ -11,7 +11,7 @@ import Field from './descriptors/field.js';
 import { Attribute } from './descriptors/gui/attribute.js';
 import { Var } from './descriptors/gui/var.js';
 
-import { MetaType, Class } from './gem.js';
+import { MetaType, Source as Class } from './gem.js';
 
 import GenericEvent from './types/events/generic.js';
 import ResizeEvent from './types/events/resize.js';

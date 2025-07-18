@@ -96,27 +96,62 @@ export const STATIC = {
  */
 
 /**
- * @callback Name
- * @param    {object}  descriptor
- * @param    {class[]} descriptor.parents
- * @param    {object}  descriptor.prescriptor
- * @returns  {string}  name to assign
+ * @callback  Name
+ * @param     {ClassDescriptor}  descriptor
+ * @returns   {string}           name to assign
  */
 
 /**
- * If name is absent, there must be at least TWO parents; OR, at least ONE
- * parent and ONE definition; OR, ONE definition.
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
  *
- * If parents are absent, there must be ONE definition. Name is optional.
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
  *
- * If definition is absent, there must be at least TWO parents.
- *
- * @callback TypeConstructor
- * @param    {string|Name}    name  Name for the Type/Class to have
+ * @overload
+ * @param    {string|Name}    name  Name for the constructor to have
  * @param    {...new object}  parents  Any parent types to extend/inherit.
  * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          A constructor/class.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @param    {string|Name}    name  Name for the constructor to have
+ * @param    {object}         definition  Properties, methods, listeners, etc.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @param    {string|Name}    name  Name for the constructor to have
+ * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @param    {object}         definition  Properties, methods, listeners, etc.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @param    {object}         definition  Properties, methods, listeners, etc.
+ * @returns  {class}          Defined constructor/class.
+ *//**
+ * @overload
+ * @returns  {class}          Generic Constructor/class.
  */
+function TypeConstructor() {};
 
 class Constructor {
 	/**
@@ -200,7 +235,8 @@ class Constructor {
 }
 
 /**
- * A factory for producing MetaTypes (types of types)
+ * A factory for producing Meta-Types/Super-Classes (types of types)
+ *
  * @function MetaType
  *
  * @param   {string}                meta_name
@@ -329,26 +365,20 @@ export function MetaType(
 
 /**
  * Generate a GENERIC Type. Creates a class that can
- * inherit multiple parents.
+ * inherit multiple parents via *composition*.
  *
  * @example
- * class C extends Type(
- *   A, B, // <-- parents
- *   {
- *     property: 42,
- *     value: Boolean
- *   }
- * ) {
- *   // ...rest of code here
+ * class C extends Compose(A, B) {
+ *     constructor() {
+ *         super(
+ *             ["args", "for", "class", "A"],
+ *             ["other", "args", "for", "class", "B"]
+ *         );
+ *         // THE REST OF THE CODE GOES HERE...
+ *     }
  * }
- *
- * @callback GenericType
- *
- * @param    {...new object}  parents
- * @param    {object}         definition
- * @returns  {class}          Newly constructed class/type.
+ * @type {TypeConstructor}
  */
-/** @type {GenericType} */
 export const Compose = MetaType(
 	"Composition",
 	name => Constructor.Class(name)
@@ -356,28 +386,22 @@ export const Compose = MetaType(
 
 /**
  * Create an Abstract.  Not to be constructed directly but inherited by a
- * child class.
+ * child class or defined/exported as a inheritable class.
  *
  * @example
  * export default Abstract(
- *   "IEventDispatcher",
- *   {
- *     listen(listener) {
- *       // ...
- *     },
- *     dispatch(msg) {
- *       // ...
+ *     "IEventDispatcher",
+ *     {
+ *         listen(listener) {
+ *             // ...
+ *         },
+ *         dispatch(msg) {
+ *             // ...
+ *         }
  *     }
- *   }
  * );
- *
- * @callback AbstractType
- *
- * @param    {string}  name
- * @param    {object}  definition
- * @returns  {class}   The abstract.
+ * @type {TypeConstructor}
  */
-/** @type {AbstractType} */
 export const Abstract = MetaType(
 	"Abstract",
 	name => Constructor.Abstract(name)
@@ -391,61 +415,51 @@ export const Abstract = MetaType(
  *
  * @example
  * const Student = Model(
- *   Person,
- *   Customer,
- *   {
- *     date_enrolled: Date,
- *     classes: Array,
- *     gpa: Number
- *   }
+ *     Person,
+ *     Customer,
+ *     {
+ *         date_enrolled: Date,
+ *         classes: Array,
+ *         gpa: Number
+ *     }
  * );
  *
  * const student = Student({
- *   name: "John Doe",
- *   customer_id: "x7B42AB00C8",
- *   date_enrolled: "2019-09-14", // <- will be parsed by Date
- *   gpa: 3.2
+ *     name: "John Doe",
+ *     customer_id: "x7B42AB00C8",
+ *     date_enrolled: "2019-09-14", // <- will be parsed by Date
+ *     gpa: 3.2
  * });
- *
- * @callback ModelType
- *
- * @param    {...new object} [parents]
- * @param    {object}        definition
- * @returns  {class}  Newly constructed class/type.
+ * @type {TypeConstructor}
  */
-/** @type {ModelType} */
 export const Model = MetaType(
 	"Model",
 	name => Constructor.Object(name)
 );
 
 /**
- * Generate a Source Type. Directly extends the first parent
- * and then inherits from the rest.
+ * Generate a Class Type. Directly extends the first parent
+ * and then inherits through composition from the rest.
  *
  * @example
  * class C extends Source(
- *   A, B, // <-- parents
- *   {
- *     property: 42,
- *     value: Boolean
- *   }
+ *     SuperClassA, // <-- inherits DIRECTLY from this class
+ *     SuperClassB, // <-- others types to extend.
+ *     {
+ *         property: 42,
+ *         value: Boolean
+ *     }
  * ) {
- *   constructor() {
- *     super(arguments_to_pass_to_A);
- *   }
- *   // ...rest of code here
+ *     constructor() {
+ *         super(...arguments_to_pass_to_A);
+ *         this.inherit(SuperClassB, ...args_to_pass_to_b);
+ *     }
+ *     // ...rest of code here
  * }
- *
- * @callback SourceType
- *
- * @param    {...new object} parents
- * @param    {object}        definition
- * @returns  {class}  Newly constructed class/type.
+ * @type {TypeConstructor}
  */
-/** @type {SourceType} */
 export const Source = MetaType(
-	"Source",
+	"Class",
 	(name, { parents: [base] }) => {
 		return Constructor.Extend(
 			base,
@@ -459,19 +473,14 @@ export const Source = MetaType(
  *
  * @example
  * const Person = Interface({
- *   "name*": String,
- *   "age*": Number,
- *   "address?": String
+ *     "name*": String,
+ *     "age*": Number,
+ *     "address?": String
  * });
  *
  * { name: "Jack", age: 32 } instanceof Person // -> TRUE
- *
- * @callback InterfaceType
- *
- * @param    {object}  definition
- * @returns  {class} Newly constructed class/type.
+ * @type {TypeConstructor}
  */
-/** @type {InterfaceType} */
 export const Interface = MetaType(
 	"Interface",
 	name => Constructor.Abstract(name),

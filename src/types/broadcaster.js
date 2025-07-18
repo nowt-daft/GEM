@@ -1,9 +1,15 @@
 import is from "../utils/is.js";
 
 /**
- * @template  {(message: any) => void}  Listener
+ * @template  {any}  Message
  */
 export class Broadcaster {
+	/**
+	 * @callback Listener
+	 * @param    {Message}  message
+	 * @returns  {void}
+	 */
+
 	/** @type {Listener[]} */
 	#listeners = [];
 
@@ -17,7 +23,7 @@ export class Broadcaster {
 	/**
 	 * Append a callback to the Broadcast
 	 * @param    {Listener}  listener
-	 * @returns  {Broadcaster<Listener>}  The current Broadcaster instance
+	 * @returns  {Broadcaster<Message>}  The current Broadcaster instance
 	 */
 	listen(listener) {
 		this.#listeners = [
@@ -30,7 +36,7 @@ export class Broadcaster {
 	/**
 	 * Remove a callback to the Broadcast
 	 * @param   {Listener}  listener
-	 * @returns {Broadcaster<Listener>}  The current Broadcaster instance
+	 * @returns {Broadcaster<Message>}  The current Broadcaster instance
 	 */
 	unlisten(listener) {
 		this.#listeners =
@@ -42,8 +48,8 @@ export class Broadcaster {
 
 	/**
 	 * Broadcast a message to all listeners
-	 * @param    {any}  message
-	 * @returns  {Broadcaster<Listener>}  The current Broadcaster instance
+	 * @param    {Message}  message
+	 * @returns  {Broadcaster<Message>}  The current Broadcaster instance
 	 */
 	dispatch(message) {
 		for (const listener of this.#listeners)
@@ -53,7 +59,7 @@ export class Broadcaster {
 
 	/**
 	 * Remove all listeners
-	 * @returns  {Broadcaster<Listener>}  The current Broadcaster instance
+	 * @returns  {Broadcaster<Message>}  The current Broadcaster instance
 	 */
 	kill() {
 		this.#listeners = [];
@@ -62,12 +68,19 @@ export class Broadcaster {
 }
 
 /**
- * @template  {(message: any) => void}  Listener
+ * @template  {any}  Message
  */
 export class ChannelBroadcaster {
+	/**
+	 * @callback Listener
+	 * @param    {Message}  message
+	 * @returns  {void}
+	 */
+
+	/** @type {string} */
 	static DELIM = ':';
 
-	/** @type {Map<string><Broadcaster<Listener>>} */
+	/** @type {Map<string><Broadcaster<Message>>} */
 	#channels = new Map([
 		['channel_name', new Broadcaster]
 	]);
@@ -85,14 +98,14 @@ export class ChannelBroadcaster {
 						[
 							/** @type {string} */
 							channel,
-							/** @type {Broadcaster<Listener>} */
+							/** @type {Broadcaster<Message>} */
 							new Broadcaster
 						] :
 					is.array(channel) ?
 						[
 							/** @type {string} */
 							channel.shift(),
-							/** @type {Broadcaster<Listener>} */
+							/** @type {Broadcaster<Message>} */
 							new Broadcaster(...channel)
 						] :
 					[]
@@ -103,7 +116,7 @@ export class ChannelBroadcaster {
 	/**
 	 * @param    {string|symbol} channel
 	 * @param    {Listener}      listener
-	 * @returns  {ChannelBroadcaster<Listener>}  The current instance.
+	 * @returns  {ChannelBroadcaster<Message>}  The current instance.
 	 */
 	listen(
 		channel,
@@ -120,7 +133,7 @@ export class ChannelBroadcaster {
 
 	/**
 	 * @param    {Listener}  listener
-	 * @returns  {ChannelBroadcaster<Listener>}  The current instance.
+	 * @returns  {ChannelBroadcaster<Message>}  The current instance.
 	 */
 	unlisten(
 		channel,
@@ -132,7 +145,7 @@ export class ChannelBroadcaster {
 	/**
 	 * @param    {string|symbol}  channel
 	 * @param    {any}            message
-	 * @returns  {ChannelBroadcaster<Listener>}  The current instance.
+	 * @returns  {ChannelBroadcaster<Message>}  The current instance.
 	 */
 	dispatch(
 		channel,
@@ -154,7 +167,7 @@ export class ChannelBroadcaster {
 
 	/**
 	 * Remove all channels and listeners.
-	 * @returns  {ChannelBroadcaster<Listener>}  The current instance.
+	 * @returns  {ChannelBroadcaster<Message>}  The current instance.
 	 */
 	kill() {
 		this.#channels = new Map([]);
