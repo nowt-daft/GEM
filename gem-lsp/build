@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # CREATE BUILD FILES
+bun i
 rm -rf ./out/
 echo "Transpiling TypeScript -> out/"
 ./node_modules/typescript/bin/tsc
 
 # REINSTALL MODULE
 cd ../
-echo "Container Project @ $PWD"
 echo "Reinstall Plugin -> node_modules/gem-lsp/"
 rm -rf node_modules/gem-lsp
-bun install
+bun i
 
 echo "Done."

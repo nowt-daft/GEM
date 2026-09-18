@@ -43,6 +43,8 @@ export const all_entries = Object.all_entries =
 			key,
 			object[key]
 		]
+	).filter(
+		([_, value]) => is.defined(value)
 	);
 
 
@@ -263,7 +265,10 @@ export const view_prototype = Object.view_prototype =
 			...output
 		];
 
-		if (type.__proto__ === Object.__proto__)
+		if (
+			type.__proto__ === Object.__proto__ ||
+			type.__proto__.name === 'HTMLElement'
+		)
 			return Object.fromEntries(output);
 
 		return view_prototype(type.__proto__, output);

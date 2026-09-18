@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# THIS SCRIPT RUNS IN THE ROOT OF GEM, NOT
+# A DEPENDENT PROJECT...
+cd ./gem-lsp/
+if ! [ -d ./node_modules ]; then
+	echo "[BUILD] GEM Language Server Plugin"
+	./build
+fi
+cd ..
+
+if ! [ -d ../../node_modules ]; then
+	echo "[EXIT] We are not a dependency."
+	exit 0
+fi
+
+echo "[SETUP] We are a dependency."
+
+bun run src/misc/plugin.js
+mkdir -p ../@types/gem
+cp -r @types/* ../@types/gem/

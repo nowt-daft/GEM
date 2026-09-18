@@ -2,17 +2,27 @@ import * as ts from 'typescript/lib/tsserverlibrary';
 import Plugin from './plugin';
 
 import {
+	readFileSync,
 	statSync,
 	existsSync,
 	rmSync,
 	readdirSync,
 } from 'node:fs';
-import { spawnSync } from "node:child_process";
+
+import { spawn } from "node:child_process";
 import { join } from "node:path";
 
 const GEM_JS_EXT = '.gem.js';
 const GEM_DTS_EXT = '.gem.d.ts';
 const GEM_SRC_DIR = 'src';
+
+function parse_env(file: string): Record<string,string> {
+	const contents = readFileSync(file, { encoding: "utf-8" });
+	const entries = contents.split("\n").filter(x => x).map(
+		line => line.split('=')
+	);
+	return Object.fromEntries(entries);
+}
 
 function init({ typescript: _ }: { typescript: typeof ts }) {
 	return new Plugin(
@@ -22,19 +32,35 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 			const SRC_DIR = `${ PROJECT_DIR }/${ GEM_SRC_DIR }`;
 			const CACHE: Map<string,number> = new Map();
 
-			const emit = (path: string) =>
-				spawnSync(
-					`${ PROJECT_DIR }/build`,
-					[ path ],
-					{ cwd: PROJECT_DIR, encoding: 'utf-8' }
-				);
+			const settings = parse_env(`${ PROJECT_DIR }/.env`);
+
+			const child = spawn(
+				settings['BUN_RUNTIME'],
+				[
+					"run",
+					"--no-telemetry",
+					"--preload",
+					`${ PROJECT_DIR }/src/misc/dom.js`,
+					`${ PROJECT_DIR }/src/misc/build.js`,
+					"--service"
+				],
+				{ cwd: PROJECT_DIR }
+			);
+
+			const emit = (path: string[]) => {
+				child.stdin.write(path.join(":"));
+			};
 
 			const crawl = (
 				path: string,
-			) => {
+				output: string[] = []
+			): string[] => {
 				for (
 					const node of
-					readdirSync(path, { recursive: true, encoding: 'utf-8' })
+					readdirSync(
+						path,
+						{ recursive: true, encoding: 'utf-8' }
+					)
 				) {
 					const node_path = join(path, node);
 					const stats = statSync(node_path);
@@ -53,21 +79,21 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 							)
 						) continue;
 
-						CACHE.set(node_path, date_modified);
-						emit(node_path);
+						// CACHE.set(node_path, date_modified);
+						output.push(node_path);
 
 					} else if (stats.isDirectory())
-						crawl(node_path);
+						output.push(...crawl(node_path));
 				}
+
+				return output;
 			};
 
 			setInterval(
-				() => {
-					crawl(
-						SRC_DIR,
-					);
-				},
-				3000
+				() => emit(
+					crawl(SRC_DIR)
+				),
+				5000
 			);
 
 			setInterval(
@@ -84,7 +110,7 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 						}
 					}
 				},
-				3000
+				10000
 			);
 		}
 	);

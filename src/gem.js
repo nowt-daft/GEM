@@ -10,6 +10,7 @@ import AbstractError from "./errors/abstract.js";
 export { default as Field } from "./descriptors/field.js";
 
 import bootstrap from "./misc/bootstrap.js";
+import ArgumentError from "./errors/argument.js";
 
 /**
  * @mixin
@@ -85,7 +86,11 @@ export const STATIC = {
 		return is.string(instance) ?
 			this.validate(instance) :
 			this.defines(instance);
-	}
+	},
+
+	// get list() {
+	// 	return List(this);
+	// }
 }
 
 /**
@@ -121,7 +126,7 @@ export const STATIC = {
  *
  * @overload
  * @param    {string|Name}    name  Name for the constructor to have
- * @param    {...new object}  parents  Any parent types to extend/inherit.
+ * @param    {class[]}        parents  Any parent types to extend/inherit.
  * @param    {object}         definition  Properties, methods, listeners, etc.
  * @returns  {class}          Defined constructor/class.
  *//**
@@ -132,16 +137,16 @@ export const STATIC = {
  *//**
  * @overload
  * @param    {string|Name}    name  Name for the constructor to have
- * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @param    {class[]}        parents Any parent types to extend/inherit.
  * @returns  {class}          Defined constructor/class.
  *//**
  * @overload
- * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @param    {class[]}        parents Any parent types to extend/inherit.
  * @param    {object}         definition  Properties, methods, listeners, etc.
  * @returns  {class}          Defined constructor/class.
  *//**
  * @overload
- * @param    {...new object}  parents Any parent types to extend/inherit.
+ * @param    {class[]}        parents Any parent types to extend/inherit.
  * @returns  {class}          Defined constructor/class.
  *//**
  * @overload
@@ -153,7 +158,7 @@ export const STATIC = {
  */
 function TypeConstructor() {};
 
-class Constructor {
+export class Constructor {
 	/**
 	 * @param    {string}  name  Name for the object constructor.
 	 * @returns  {class}   Constructor for building objects.
@@ -235,6 +240,39 @@ class Constructor {
 }
 
 /**
+ * GEMify your existing types!
+ * Adds some static properties for:
+ *     + validation
+ *     + parsing
+ *     + serialising
+ *     + type-checking
+ *     + etc.
+ *
+ * @param    {class}  type
+ * @returns  {class}  Modified class "type"
+ */
+export function Gemify(
+	type
+) {
+	if (
+		!is.class(type)
+	)
+		throw new ArgumentError(
+			'type',
+			Function,
+			type.constructor
+		);
+	
+	return Object.defineProperties(
+		type,
+		Properties.fixed(
+			STATIC,
+			false
+		)
+	);
+}
+
+/**
  * A factory for producing Meta-Types/Super-Classes (types of types)
  *
  * @function MetaType
@@ -259,21 +297,13 @@ export function MetaType(
 			name,
 			...prescriptors
 		) {
-			// TYPIFY class
+			// Restart TypeBuilder but use the
+			// meta_name as the Type's name:
 			if (
-				is.global(this) &&
-				prescriptors.length === 0 &&
-				is.class(name)
-			) {
-				return Object.defineProperties(
-					name,
-					Properties.fixed(STATIC, false)
-				);
-			}
-
-			// Restart Type but using the meta_name as the Type's name...
-			if (
-				is.class(name) ||
+				(
+					!is.string(name) && is.array(name) &&
+					name.every(x => is.class(x))
+				) ||
 				is.object_literal(name)
 			) {
 				return TypeBuilder(
@@ -296,7 +326,9 @@ export function MetaType(
 
 			const constructor =
 				constructor_format(
-					is.lamda(name) ? name({ parents, prescriptor }) : name,
+					is.lamda(name) ?
+						name({ parents, prescriptor }) :
+						name,
 					{
 						parents,
 						prescriptor,
@@ -347,13 +379,15 @@ export function MetaType(
 				)
 			);
 
-			return is.global(this) ? constructor : init(this, constructor);
+			return is.global(this) ?
+				constructor :
+				init(this, constructor);
 		}
 	}[meta_name];
 
 	/** @type {TypeConstructor} */
 	return Object.defineProperties(
-		TypeBuilder(TypeBuilder), // Typify ourselves!
+		Gemify(TypeBuilder),
 		Properties.fixed(
 			{
 				constructor: MetaType
@@ -503,6 +537,6 @@ export const Interface = MetaType(
 
 bootstrap.forEach(
 	([type, statics = {}]) =>
-		Compose(type).static(statics)
+		Gemify(type).static(statics)
 );
 

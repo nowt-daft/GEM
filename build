@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-source setenv
-
-TARGET=${1:-"."}
-$BUN_RUNTIME run ./src/misc/build.js $TARGET

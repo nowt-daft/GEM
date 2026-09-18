@@ -92,7 +92,7 @@ export default class Accessor extends Descriptor {
 						this,
 						hidden_key,
 						Property.variable(
-							get({ target: this, key }),
+							get({ target: this }),
 							false
 						)
 					)[hidden_key],

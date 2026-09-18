@@ -19,7 +19,7 @@ export default [
 	[
 		Boolean,
 		{
-expression: /^(true|false)$/,
+			expression: /^(true|false)$/,
 			parse(string) {
 				return string.toLowerCase() === "true";
 			}
@@ -65,7 +65,6 @@ expression: /^(true|false)$/,
 			parse(string) {
 				return JSON.parse(string);
 			},
-			// TODO: stringify and serialise need to be implemented?
 			stringify(object) {
 				return JSON.stringify(object);
 			}
@@ -77,7 +76,6 @@ expression: /^(true|false)$/,
 			parse(string) {
 				return JSON.parse(string);
 			},
-			// TODO: stringify and serialise need to be implemented?
 			stringify(array) {
 				return JSON.stringify(array);
 			}

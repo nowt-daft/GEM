@@ -13,6 +13,7 @@ import MultiInheritError from "../errors/multi_inherit.js";
 
 import Accessor from "./accessor.js";
 import Fields from "./fields.js";
+import Method from "./method.js";
 
 /**
  * @typedef {import('./fields.js').Key} Key
@@ -137,8 +138,10 @@ export default class ClassDescriptor {
 	 * @param {...object} prescriptors
 	 */
 	constructor(...prescriptors) {
-		let [prescriptor, ...parents] = [
-			is.object_literal(prescriptors.at(-1)) && prescriptors.pop(),
+		let [parents, prescriptor] = [
+			is.array(prescriptors.at(0)) ?
+				prescriptors.shift() :
+				[],
 			...prescriptors
 		];
 
@@ -171,7 +174,16 @@ export default class ClassDescriptor {
 			...parents.map(
 				p => view(p.prototype ?? {})
 			),
-			prototype
+			map(
+				prototype,
+				(key, method) => [
+					key,
+					is.object_literal(method) ?
+						Method(key, method) :
+						method
+				]
+			)
+			// prototype
 		);
 		defaults = concat(
 			...parents.map(
@@ -227,12 +239,29 @@ export default class ClassDescriptor {
 		return sort(
 			prescriptor || {},
 			(key, value) => {
+				if (
+					is.object_literal(value)
+				) {
+					if (
+						is.object_literal(value.params) &&
+						is.method(value.method) &&
+						is.class(value.returns)
+					)
+						return METHOD;
+
+					// TODO: Add logic for an object_literal to
+					// be added as a DEFAULT...
+				}
+
 				if (is.method(value))
 					return key.startsWith(AT) ? LISTENER : METHOD;
 
 				return (
 					is.literal(value) &&
 					parents.some(
+						// TODO: We should, in fact, do some TYPE
+						// CHECKING here... otherwise we could get
+						// some weird bugs...
 						p => Object.hasOwn(p.properties ?? {}, key)
 					)
 				) ? DEFAULT : PROPERTY;

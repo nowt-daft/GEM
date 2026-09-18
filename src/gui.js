@@ -1,7 +1,17 @@
-import { concat, view, forEach, filter, build, verify } from './types/object.js';
+import {
+	concat,
+	view,
+	forEach,
+	filter,
+	build,
+	verify
+} from './types/object.js';
 
 import is from './utils/is.js';
-import { capitalise, is_capital } from './utils/string.js';
+import {
+	capitalise,
+	is_capital
+} from './utils/string.js';
 
 import Properties from './descriptors/properties.js';
 import Accessor from './descriptors/accessor.js';
@@ -11,12 +21,17 @@ import Field from './descriptors/field.js';
 import { Attribute } from './descriptors/gui/attribute.js';
 import { Var } from './descriptors/gui/var.js';
 
-import { MetaType, Source as Class } from './gem.js';
+import {
+	MetaType,
+	Source as Class,
+	Abstract
+} from './gem.js';
 
 import GenericEvent from './types/events/generic.js';
 import ResizeEvent from './types/events/resize.js';
 
-import ComponentDefinitionError from './errors/component_definition.js';
+import ComponentDefinitionError from
+	'./errors/component_definition.js';
 
 const HTML = 'HTML';
 const ELEMENT = 'Element';
@@ -87,102 +102,52 @@ export const create = (
 	return element;
 };
 
-const HTMLFields = {
+const HTMLProperties = Fields.to_descriptors({
 	styles: Accessor.Cache(
-		target => getComputedStyle(target)
+		({ target }) => getComputedStyle(target)
 	),
 	bounds: Field(DOMRect)
 			.listen(
 				({ target, to: bounds }) =>
 					target.dispatch(new ResizeEvent(bounds))
 			)
-};
-
-/**
- * @callback HTMLListener
- * @param    {Event}
- */
-
-/**
- * @class HTMLComponent
- * @extends HTMLElement
- */
-export class HTMLComponent extends Class(
-	HTMLElement,
-	HTMLFields // Is this bit necessary? Probably not...
-) {
-	/** @returns {CSSStyleDeclaration} */
-	get styles() {
-		return getComputedStyle(this);
-	};
-	/** @type {DOMRect} */
-	bounds;
-
-	constructor() {
-		super();
-	}
-
-	/**
-	 * @param   {Record<string><any>}    attributes
-	 * @param   {Record<string><string>} dataset
-	 * @returns {HTMLComponent}          new HTMLComponent
-	 */
-	static create(
-		attributes,
-		dataset
-	) {
-		return create(
-			this.TAG,
-			attributes,
-			dataset
-		);
-	}
-
-	static {
-		let name = this.name.slice(HTML.length);
-		if (name.endsWith(ELEMENT))
-			name = name.slice(0, -ELEMENT.length);
-
-		let tag = '';
-		for (const letter of tag)
-			tag += is_capital(letter) ?
-				TAG_DELIM + letter.toLowerCase() :
-				letter;
-
-		if (tag.startsWith(TAG_DELIM))
-			tag = tag.slice(1);
-
-		this.TAG = tag;
-	}
-
+});
+const HTMLPrototype = {
 	/**
 	 * @param    {string}  key
-	 * @param    {string}  [value=undefined]
+	 * @param    {string?} value
 	 * @returns  {string}  The existing or new Attribute value.
 	 */
-	attr(
-		key,
-		value = undefined
-	) {
-		return is.undefined(value) ?
-			this.getAttribute(key) :
-			this.setAttribute(key, value) ?? value;
-	}
+	attr: {
+		params: {
+			"key*": String,
+			"value?": String
+		},
+		method(
+			key,
+			value
+		) {
+			return value === "" ?
+				this.getAttribute(key) :
+				this.setAttribute(key, value) ?? value;
+		},
+		returns: String
+	},
 
 	/**
 	 * @param    {string}  name
-	 * @param    {string}  [value=undefined]
+	 * @param    {string?}  value
 	 * @returns  {string}  The existing or new CSS variable value.
 	 */
 	var(
-		name,
-		value = undefined
+		name = "",
+		value = ""
 	) {
 		const key = `--${ name }`;
-		return is.undefined(value) ?
+		return value === "" ?
 			this.styles.getPropertyValue(key) :
 			this.style.setProperty(key, value) ?? value;
-	}
+	},
 
 	/**
 	 * Attach elements as children to this element.
@@ -194,8 +159,9 @@ export class HTMLComponent extends Class(
 		...elements
 	) {
 		this.append(...elements);
+		// return HTMLElement
 		return this;
-	}
+	},
 
 	/**
 	 * Remove elements from being children of this element.
@@ -208,8 +174,9 @@ export class HTMLComponent extends Class(
 	) {
 		for (const element of elements)
 			this.removeChild(element);
+		// return HTMLElement
 		return this;
-	}
+	},
 
 	/**
 	 * Alias for addEventListener.
@@ -220,8 +187,8 @@ export class HTMLComponent extends Class(
 	 * @returns {HTMLComponent} this
 	 */
 	listen(
-		channel,
-		listener,
+		channel = "",
+		listener = (e = new Event) => void 0,
 		captures = false
 	) {
 		if (channel === RESIZE)
@@ -233,8 +200,9 @@ export class HTMLComponent extends Class(
 			captures
 		);
 
+		// return HTMLElement
 		return this;
-	}
+	},
 
 	/**
 	 * Alias for removeEventListener.
@@ -245,8 +213,8 @@ export class HTMLComponent extends Class(
 	 * @returns {HTMLComponent} this
 	 */
 	unlisten(
-		channel,
-		listener,
+		channel = "",
+		listener = (e = new Event) => void 0,
 		captures = false
 	) {
 		if (channel === RESIZE)
@@ -258,8 +226,9 @@ export class HTMLComponent extends Class(
 			captures
 		);
 
+		// return HTMLElement
 		return this;
-	}
+	},
 
 	/**
 	 * Convenience for dispatchEvent
@@ -283,36 +252,106 @@ export class HTMLComponent extends Class(
 				new GenericEvent(event, data) :
 				event
 		);
+
+		// return HTMLElement
 		return this;
+	},
+};
+
+/**
+ * @deprecated
+ * DEPRECATED. HTMLElement will absorb necessary FIELDS
+ * and PROTOTYPE, then Component will do the rest.
+ */
+export const HTMLAbstract = Abstract(
+	"HTMLAbstract",
+	{
+		...HTMLProperties,
+		...HTMLPrototype
+	}
+);
+
+
+/**
+ * @callback HTMLListener
+ * @param    {Event}
+ */
+
+/**
+ * @class HTMLComponent
+ * @extends HTMLElement
+ *
+ * @deprecated
+ *
+ * THIS IS DEPRECATED. Only leaving reference as the static
+ * methods MIGHT be used in the future elsewhere.
+ */
+export class HTMLComponent extends Class(
+	"HTMLSuperComponent",
+	[
+		HTMLElement,
+		HTMLAbstract
+	],
+) {
+	constructor() {
+		super();
+	}
+
+	/**
+	 * @param   {Record<string><any>}    attributes
+	 * @param   {Record<string><string>} dataset
+	 * @returns {HTMLComponent}          new HTMLComponent
+	 */
+	static create(
+		attributes = {},
+		dataset = {}
+	) {
+		return create(
+			this.TAG,
+			attributes,
+			dataset
+		);
+	}
+
+	static {
+		let name = this.name.slice(HTML.length);
+		if (name.endsWith(ELEMENT))
+			name = name.slice(0, -ELEMENT.length);
+
+		let tag = '';
+		for (const letter of name)
+			tag += is_capital(letter) ?
+				TAG_DELIM + letter.toLowerCase() :
+				letter;
+
+		if (tag.startsWith(TAG_DELIM))
+			tag = tag.slice(1);
+
+		this.TAG = tag;
 	}
 }
 
 /**
- * Properties to attach to the HTMLElement prototype. This way, all elements
- * have the styles getter and the bounds field.
+ * Add our custom fields and prototype to ALL
+ * existing Elements, bb.
  */
-const FIELDS = new Fields(HTMLFields).init();
-
-/**
- * Methods to attach to the HTMLElement prototype. This way, all elements
- * have these convenient methods to use.
- */
-const PROTOTYPE = Properties.fixed(view(HTMLComponent.prototype), false);
-
 Object.defineProperties(
 	HTMLElement.prototype,
 	concat(
-		FIELDS,
-		PROTOTYPE
+		HTMLProperties,
+		Properties.fixed(
+			HTMLPrototype,
+			// false
+		)
 	)
 );
 
 /**
  * @callback DefineComponent
  *
- * @param   {string}              tag      HTML tag
- * @param   {...Function}         parents  Parent classes
- * @param   {Record<string><any>} defintiion  Fields, methods, listeners
+ * @param {string}              tag        HTML tag
+ * @param {class[]}             parents    Parent classes
+ * @param {Record<string,any>} definition
  *
  * @returns {HTMLComponent}
  */
@@ -322,17 +361,29 @@ export const Component = MetaType(
 	(
 		tag,
 		{
+			// Right, so this part is wrong...
+			// Because we should have more than
+			// ONE parent anyway.
+			// THEN, We need to make sure we are
+			// appending PROTOYPE and PROPERTIES properly.
 			parents: [parent],
 			prescriptor,
+			properties,
+			prototype,
 			listeners
 		}
 	) => {
 		tag = tag.toLowerCase();
+
 		const names = tag.split(TAG_DELIM);
+		
 		if (names.length === 1)
 			throw new ComponentDefinitionError(tag);
 
-		const class_name = names.map(str => capitalise(str)).join('');
+		const class_name = names.map(
+			str => capitalise(str)
+		).join('');
+		
 		// TODO: attributes, variables, and listeners all sorta
 		// have something in common, this needs re-evaluated to
 		// some extent... revisit soon...
@@ -353,9 +404,31 @@ export const Component = MetaType(
 					)
 			);
 
+		console.log('********************');
+
+		Object.assign(
+			properties,
+			HTMLProperties // <-- THIS MIGHT NEED TO CHANGE...
+		);
+
+		console.log(properties);
+
+		Object.assign(
+			prototype,
+			HTMLPrototype
+		);
+
+		console.log(prototype);
+		
+		console.log('********************');
+
 		return {
 			[class_name]: class extends (
-				parent.name.startsWith(HTML) ?
+				// TODO:
+				// It might, in fact, ALWAYS be HTMLElement, and
+				// hence WHY we need the extends property in the
+				// customElements.define call...
+				parent?.name.startsWith(HTML) ?
 					parent :
 					HTMLElement
 			) {
@@ -365,9 +438,9 @@ export const Component = MetaType(
 					customElements.define(
 						tag, // HTML TAG (eg. navigation-pane)
 						this, // Class (eg. NavigationPane)
-						this.__proto__ === HTMLElement ? // Parent Class HTMLElement?
-							undefined : // If yes, do nothing
-							{ extends: this.__proto__ } // If no, define extends.
+						this.__proto__ === HTMLElement ?
+							undefined :
+							{ extends: this.__proto__ }
 					);
 				}
 
@@ -389,6 +462,8 @@ export const Component = MetaType(
 
 					this.dispatch(CONNECTED);
 					this.renderCallback();
+
+					return void 0;
 				}
 
 				disconnectedCallback() {
@@ -400,6 +475,8 @@ export const Component = MetaType(
 					);
 
 					this.dispatch(DISCONNECTED);
+
+					return void 0;
 				}
 
 				renderCallback() {
@@ -420,6 +497,8 @@ export const Component = MetaType(
 					requestAnimationFrame(
 						() => this.renderCallback()
 					);
+
+					return void 0;
 				}
 			}
 		}[class_name];

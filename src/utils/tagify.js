@@ -10,7 +10,7 @@ const ARROW = '=>';
  * @returns {string}
  */
 export const parse_args = func => {
-	const source = func.toString();
+	const source = func.toString?.() ?? '';
 	
 	let start = source.indexOf(LP);
 
@@ -38,6 +38,12 @@ export const parse_args = func => {
 
 	return source.slice(start + 1, index).trim();
 };
+
+export const parse_returns = func => {
+	const source = func.toString?.() ?? '';
+	const part = source.split('// return ')[1]?.split('\n')[0];
+	return part ?? 'void';
+}
 
 const TAGGERS = {
 	undefined: () => 'UNDEFINED',

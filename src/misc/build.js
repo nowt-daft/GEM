@@ -1,4 +1,4 @@
-import { forEach, view_prototype } from "../types/object.js";
+import { filter, forEach, view_prototype } from "../types/object.js";
 import { open, save, list } from "../io/disk.js";
 import { join } from "../io/path.js";
 import is from "../utils/is.js";
@@ -9,13 +9,9 @@ import { Get } from "../descriptors/accessor.js";
 import { GetDescriptor } from "../descriptors/getter.js";
 import { MetaType } from "../gem.js";
 
-import { parse_args } from "../utils/tagify.js";
+import { parse_args, parse_returns } from "../utils/tagify.js";
 import ts from "typescript";
 
-/**
- * This script also can be run directly.
- * Requires ONE argument (path to gem file)
- */
 
 const GEM_JS_EXT = '.gem.js';
 const GEM_DTS_EXT = '.gem.d.ts';
@@ -32,6 +28,43 @@ const TAB = '\t';
 
 
 const COMPILED_DTS = {};
+
+
+/**
+ * @param    {...string}  paths
+ * @returns  {string}
+ */
+const compile = (...paths) => {
+	const options = {
+		allowJs: true,
+		declaration: true,
+		emitDeclarationOnly: true,
+	};
+
+	const output = {};
+
+	try {
+		const host = ts.createCompilerHost(options);
+		host.writeFile = (
+			path,
+			contents
+		) => output[path] = contents;
+
+		ts.createProgram(
+			paths,
+			options,
+			host
+		).emit();
+	} catch (e) {
+		console.log(`ERROR: ${ e }`);
+		return false;
+	}
+
+	return Object.assign(
+		COMPILED_DTS,
+		output
+	);
+}
 
 /**
  * @param    {string}  path
@@ -75,37 +108,6 @@ const render = (
 }
 
 /**
- * @param    {...string}  paths
- * @returns  {string}
- */
-const compile = (...paths) => {
-	const options = {
-		allowJs: true,
-		declaration: true,
-		emitDeclarationOnly: true,
-	};
-
-	const output = {};
-	
-	const host = ts.createCompilerHost(options);
-	host.writeFile = (
-		path,
-		contents
-	) => output[path] = contents;
-
-	ts.createProgram(
-		paths,
-		options,
-		host
-	).emit();
-
-	return Object.assign(
-		COMPILED_DTS,
-		output
-	);
-}
-
-/**
  * @param    {string}  rendered_imports
  * @param    {string}  rendered_type
  * @param    {string}  rendered_end
@@ -142,7 +144,12 @@ const render_imports = contents => {
  */
 const render_type = type => {
 	const { name, prescriptor } = type;
-	const declaration = `declare class ${ name }`;
+	const declaration =
+		`declare class ${ name }` + (
+			type.__proto__ === Object.__proto__ ?
+				'' :
+				` extends ${ type.__proto__.name }`
+		);
 
 	let fields = '';
 
@@ -154,7 +161,15 @@ const render_type = type => {
 	fields += fields ? NEWLINE : '';
 
 	forEach(
-		view_prototype(type),
+		filter(
+			view_prototype(type),
+			key => ![
+				// TODO: This MIGHT move to types/object.js
+				'connectedCallback',
+				'disconnectedCallback',
+				'renderCallback'
+			].includes(key)
+		),
 		(key, method) =>
 			fields +=
 				TAB +
@@ -234,7 +249,7 @@ const render_method = (
 		render_returns(
 			name === 'constructor' ?
 				type :
-				func.returns
+				func.returns ?? parse_returns(func)
 		)
 	};`;
 }
@@ -279,55 +294,99 @@ const emit = async source => {
 	save(out, contents);
 }
 
+/**
+ * @param  {string}  gem_file  File to compile, baby.
+ */
 function main(
-	runtime,
-	script,
 	gem_file
 ) {
+	if (gem_file !== '.') {
+		const files = gem_file.split(":");
+
+		console.log("RECEIVED");
+		console.log(files);
+
+		if (
+			compile(...files)
+		) {
+			for (const file of files)
+				emit(file);
+		}
+
+		return;
+	}
+
+	const crawl = (
+		path,
+		output = []
+	) => {
+		for (const node of list(path)) {
+			output = [
+				...output,
+				...(
+					node.endsWith('/') ?
+						crawl(
+							join(path, node),
+						) :
+						node.endsWith(GEM_JS_EXT) ?
+							[join(path, node)] :
+							[]
+				)
+			];
+		}
+		return output;
+	}
+
+	const files = crawl(
+		join(
+			import.meta.dir, // -> <REPO>/src/misc
+			'../' // -> <REPO>/src
+		)
+	);
+
 	if (
-		runtime.includes('bun') &&
-		script === import.meta.path &&
-		gem_file
+		compile(...files)
 	) {
-		if (gem_file !== '.') {
-			compile(gem_file);
-			return emit(gem_file);
-		}
-
-		const crawl = (
-			path,
-			output = []
-		) => {
-			for (const node of list(path)) {
-				output = [
-					...output,
-					...(
-						node.endsWith('/') ?
-							crawl(
-								join(path, node),
-							) :
-							node.endsWith(GEM_JS_EXT) ?
-								[join(path, node)] :
-								[]
-					)
-				];
-			}
-			return output;
-		}
-
-		const files = crawl(
-			join(
-				import.meta.dir, // -> <REPO>/src/misc
-				'../' // -> <REPO>/src
-			)
-		);
-
-		compile(...files);
-
 		for (const file of files)
 			emit(file);
 	}
+
 }
 
-main(...process.argv);
+const [
+	runtime,
+	script,
+	input
+] = process.argv;
 
+let _busy = false;
+
+process.stdin.setEncoding('utf8');
+
+console.log("STARTING:", input);
+
+if (
+	runtime.includes('bun') &&
+	script === import.meta.path
+) {
+	if (input === "--service") {
+		process.stdin.on(
+			"data",
+			data => {
+				console.log(
+					`STATUS: ${
+						_busy ? "busy" : "ready"
+					}`
+				);
+				if (_busy)
+					return;
+
+				_busy = true;
+				main(data);
+				_busy = false;
+			}
+		);
+	} else {
+		main(input);
+	}
+}
