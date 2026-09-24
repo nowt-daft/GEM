@@ -113,11 +113,6 @@ const HTMLProperties = Fields.to_descriptors({
 			)
 });
 const HTMLPrototype = {
-	/**
-	 * @param    {string}  key
-	 * @param    {string?} value
-	 * @returns  {string}  The existing or new Attribute value.
-	 */
 	attr: {
 		params: {
 			"key*": String,
@@ -134,19 +129,21 @@ const HTMLPrototype = {
 		returns: String
 	},
 
-	/**
-	 * @param    {string}  name
-	 * @param    {string?}  value
-	 * @returns  {string}  The existing or new CSS variable value.
-	 */
-	var(
-		name = "",
-		value = ""
-	) {
-		const key = `--${ name }`;
-		return value === "" ?
-			this.styles.getPropertyValue(key) :
-			this.style.setProperty(key, value) ?? value;
+	var: {
+		params: {
+			"name": "position",
+			"value?": String
+		},
+		method(
+			name,
+			value
+		) {
+			const key = `--${ name }`;
+			return value === "" ?
+				this.styles.getPropertyValue(key) :
+				this.style.setProperty(key, value) ?? value;
+		},
+		returns: String
 	},
 
 	/**
@@ -263,13 +260,13 @@ const HTMLPrototype = {
  * DEPRECATED. HTMLElement will absorb necessary FIELDS
  * and PROTOTYPE, then Component will do the rest.
  */
-export const HTMLAbstract = Abstract(
-	"HTMLAbstract",
-	{
-		...HTMLProperties,
-		...HTMLPrototype
-	}
-);
+// export const HTMLAbstract = Abstract(
+// 	"HTMLAbstract",
+// 	{
+// 		...HTMLProperties,
+// 		...HTMLPrototype
+// 	}
+// );
 
 
 /**
@@ -286,50 +283,50 @@ export const HTMLAbstract = Abstract(
  * THIS IS DEPRECATED. Only leaving reference as the static
  * methods MIGHT be used in the future elsewhere.
  */
-export class HTMLComponent extends Class(
-	"HTMLSuperComponent",
-	[
-		HTMLElement,
-		HTMLAbstract
-	],
-) {
-	constructor() {
-		super();
-	}
-
-	/**
-	 * @param   {Record<string><any>}    attributes
-	 * @param   {Record<string><string>} dataset
-	 * @returns {HTMLComponent}          new HTMLComponent
-	 */
-	static create(
-		attributes = {},
-		dataset = {}
-	) {
-		return create(
-			this.TAG,
-			attributes,
-			dataset
-		);
-	}
-
-	static {
-		let name = this.name.slice(HTML.length);
-		if (name.endsWith(ELEMENT))
-			name = name.slice(0, -ELEMENT.length);
-
-		let tag = '';
-		for (const letter of name)
-			tag += is_capital(letter) ?
-				TAG_DELIM + letter.toLowerCase() :
-				letter;
-
-		if (tag.startsWith(TAG_DELIM))
-			tag = tag.slice(1);
-
-		this.TAG = tag;
-	}
-}
+// export class HTMLComponent extends Class(
+// 	"HTMLSuperComponent",
+// 	[
+// 		HTMLElement,
+// 		HTMLAbstract
+// 	],
+// ) {
+// 	constructor() {
+// 		super();
+// 	}
+//
+// 	/**
+// 	 * @param   {Record<string><any>}    attributes
+// 	 * @param   {Record<string><string>} dataset
+// 	 * @returns {HTMLComponent}          new HTMLComponent
+// 	 */
+// 	static create(
+// 		attributes = {},
+// 		dataset = {}
+// 	) {
+// 		return create(
+// 			this.TAG,
+// 			attributes,
+// 			dataset
+// 		);
+// 	}
+//
+// 	static {
+// 		let name = this.name.slice(HTML.length);
+// 		if (name.endsWith(ELEMENT))
+// 			name = name.slice(0, -ELEMENT.length);
+//
+// 		let tag = '';
+// 		for (const letter of name)
+// 			tag += is_capital(letter) ?
+// 				TAG_DELIM + letter.toLowerCase() :
+// 				letter;
+//
+// 		if (tag.startsWith(TAG_DELIM))
+// 			tag = tag.slice(1);
+//
+// 		this.TAG = tag;
+// 	}
+// }
 
 /**
  * Add our custom fields and prototype to ALL
@@ -404,23 +401,15 @@ export const Component = MetaType(
 					)
 			);
 
-		console.log('********************');
-
 		Object.assign(
 			properties,
 			HTMLProperties // <-- THIS MIGHT NEED TO CHANGE...
 		);
 
-		console.log(properties);
-
 		Object.assign(
 			prototype,
 			HTMLPrototype
 		);
-
-		console.log(prototype);
-		
-		console.log('********************');
 
 		return {
 			[class_name]: class extends (

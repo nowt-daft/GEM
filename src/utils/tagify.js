@@ -1,5 +1,8 @@
 import is from "./is.js";
 
+const NEWLINE = '\n';
+const ASSIGN = '=';
+const COMMA = ',';
 const SPACE = ' ';
 const LP = '(';
 const RP = ')';
@@ -8,6 +11,8 @@ const ARROW = '=>';
 /**
  * @param   {function} func
  * @returns {string}
+ *
+ * TODO: RENAME TO parse_params... parse_args makes no sense.
  */
 export const parse_args = func => {
 	const source = func.toString?.() ?? '';
@@ -36,13 +41,30 @@ export const parse_args = func => {
 		);
 	}
 
-	return source.slice(start + 1, index).trim();
+	return source.slice(
+			start + 1,
+			index
+		).trim();
+
+		// .split(
+		// 	NEWLINE
+		// ).map(
+		// 	param =>
+		// 		param.replace(
+		// 			/^([$A-Za-z0-9_]+),?\s*\/\/ ([$A-Za-z0-9_]+)\s*/,
+		// 			(_, param, type) => `${ param }: ${ type }`
+		// 		)
+		// ).join(
+		// 	NEWLINE
+		// );
 };
 
 export const parse_returns = func => {
+	const ENDLINE = /\/\/ => ([$A-Za-z0-9_]+)\s*/;
+	const INLINE = /\/\* =>\s*([$A-Za-z0-9_]+)\s* \*\//;
+
 	const source = func.toString?.() ?? '';
-	const part = source.split('// return ')[1]?.split('\n')[0];
-	return part ?? 'void';
+	return ENDLINE.exec(source)?.[1] ?? INLINE.exec(source)?.[1] ?? 'unknown';
 }
 
 const TAGGERS = {
