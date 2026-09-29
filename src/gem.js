@@ -1,8 +1,9 @@
 import is from "./utils/is.js";
-import { init, construct } from "./types/object.js";
+import { init, construct, map } from "./types/object.js";
 
 import Properties from "./descriptors/properties.js";
 import ClassDescriptor from "./descriptors/class.js";
+import Method from "./descriptors/method.js";
 
 import MetaTypeError from "./errors/metatype.js";
 import AbstractError from "./errors/abstract.js";
@@ -374,7 +375,16 @@ export function MetaType(
 			Object.defineProperties(
 				constructor.prototype,
 				Properties.fixed(
-					prototype,
+					map(
+						prototype,
+						(key, method) => [
+							key,
+							is.object_literal(method) ?
+								Method(key, method) :
+								method
+						]
+					),
+					// prototype,
 					false
 				)
 			);

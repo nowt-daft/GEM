@@ -3,7 +3,7 @@ import { diff } from "../io/path.js";
 import program from "./program.js";
 import render from "./render.js";
 
-const MAX_COL_WIDTH = 40;
+const MAX_COL_WIDTH = 60;
 const TYPES_DIR = '@types/'
 const GEM_JS_EXT = '.gem.js';
 const GEM_DTS_EXT = '.gem.d.ts';
@@ -41,9 +41,10 @@ const save = async (
 		path
 	);
 
+	console.log('='.repeat(MAX_COL_WIDTH));
 	console.log(dts);
+	console.log('='.repeat(MAX_COL_WIDTH));
 
-	// console.log('-'.repeat(40));
 	return Bun.write(path, dts);
 }
 

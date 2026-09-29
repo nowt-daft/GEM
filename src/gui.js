@@ -1,6 +1,6 @@
 import {
 	concat,
-	view,
+	// view,
 	forEach,
 	filter,
 	build,
@@ -10,7 +10,7 @@ import {
 import is from './utils/is.js';
 import {
 	capitalise,
-	is_capital
+	// is_capital
 } from './utils/string.js';
 
 import Properties from './descriptors/properties.js';
@@ -23,18 +23,21 @@ import { Var } from './descriptors/gui/var.js';
 
 import {
 	MetaType,
-	Source as Class,
-	Abstract
+	// Source as Class,
+	// Abstract
 } from './gem.js';
 
 import GenericEvent from './types/events/generic.js';
 import ResizeEvent from './types/events/resize.js';
 
+import Any from './types/any.js';
+import List from "./types/list.js";
+
 import ComponentDefinitionError from
 	'./errors/component_definition.js';
 
 const HTML = 'HTML';
-const ELEMENT = 'Element';
+// const ELEMENT = 'Element';
 
 const CONNECTED = 'connected';
 const DISCONNECTED = 'disconnected';
@@ -131,7 +134,7 @@ const HTMLPrototype = {
 
 	var: {
 		params: {
-			"name": "position",
+			"name": String,
 			"value?": String
 		},
 		method(
@@ -146,113 +149,100 @@ const HTMLPrototype = {
 		returns: String
 	},
 
-	/**
-	 * Attach elements as children to this element.
-	 *
-	 * @param   {...HTMLComponent} elements
-	 * @returns {HTMLComponent}    this
-	 */
-	attach(
-		...elements
-	) {
-		this.append(...elements);
-		// return HTMLElement
-		return this;
+	attach: {
+		params: {
+			"...elements": List(HTMLElement)
+		},
+		method(
+			...elements
+		) {
+			this.append(...elements);
+			return this;
+		},
+		returns: HTMLElement
 	},
 
-	/**
-	 * Remove elements from being children of this element.
-	 *
-	 * @param   {...HTMLComponent} elements
-	 * @returns {HTMLComponent}    this
-	 */
-	detach(
-		...elements
-	) {
-		for (const element of elements)
-			this.removeChild(element);
-		// return HTMLElement
-		return this;
+	detach: {
+		params: {
+			"...elements": List(HTMLElement)
+		},
+		method(
+			...elements
+		) {
+			for (const element of elements)
+				this.removeChild(element);
+			return this;
+		},
+		returns: HTMLElement
 	},
 
-	/**
-	 * Alias for addEventListener.
-	 *
-	 * @param   {string}        channel
-	 * @param   {HTMLListener}  listener
-	 * @param   {boolean}       captures
-	 * @returns {HTMLComponent} this
-	 */
-	listen(
-		channel = "",
-		listener = (e = new Event) => void 0,
-		captures = false
-	) {
-		if (channel === RESIZE)
-			RESIZE_LISTENER.observe(this);
-		
-		this.addEventListener(
+	listen: {
+		params: {
+			channel: String,
+			listener: Function, // TODO: WE NEED A Callback TYPE.
+			"captures?": false
+		},
+		method(
 			channel,
 			listener,
-			captures
-		);
+			captures = false
+		) {
+			if (channel === RESIZE)
+				RESIZE_LISTENER.observe(this);
+			
+			this.addEventListener(
+				channel,
+				listener,
+				captures
+			);
 
-		// return HTMLElement
-		return this;
+			return this;
+		},
+		returns: HTMLElement
 	},
 
-	/**
-	 * Alias for removeEventListener.
-	 *
-	 * @param   {string}        channel
-	 * @param   {HTMLListener}  listener
-	 * @param   {boolean}       captures
-	 * @returns {HTMLComponent} this
-	 */
-	unlisten(
-		channel = "",
-		listener = (e = new Event) => void 0,
-		captures = false
-	) {
-		if (channel === RESIZE)
-			RESIZE_LISTENER.unobserve(this);
-
-		this.removeEventListener(
+	unlisten: {
+		params: {
+			channel: String,
+			listener: Function, // TODO: Use Callback type
+			"captures?": false
+		},
+		method(
 			channel,
 			listener,
-			captures
-		);
+			captures = false
+		) {
+			if (channel === RESIZE)
+				RESIZE_LISTENER.unobserve(this);
 
-		// return HTMLElement
-		return this;
+			this.removeEventListener(
+				channel,
+				listener,
+				captures
+			);
+
+			return this;
+		}
 	},
 
-	/**
-	 * Convenience for dispatchEvent
-	 *
-	 * @example
-	 * element.dispatch("pinch", { x: 0, y: 42 });
-	 *
-	 * @example
-	 * element.dispatchEvent(new ResizeEvent(element.getBoundingClientRect()))
-	 *
-	 * @param   {string|GenericEvent}  event
-	 * @param   {object}               data
-	 * @returns {HTMLComponent}        this
-	 */
-	dispatch(
-		event,
-		data = {}
-	) {
-		this.dispatchEvent(
-			is.string(event) ?
-				new GenericEvent(event, data) :
-				event
-		);
-
-		// return HTMLElement
-		return this;
-	},
+	dispatch: {
+		params: {
+			event: Any, // TODO: This should be Either(String, Object)
+			"data?": Object
+		},
+		method(
+			event,
+			data = {}
+		) {
+			this.dispatchEvent(
+				is.string(event) ?
+					new GenericEvent(event, data) :
+					event
+			);
+			return this;
+		},
+		returns: HTMLElement
+	}
 };
 
 /**

@@ -13,7 +13,6 @@ import MultiInheritError from "../errors/multi_inherit.js";
 
 import Accessor from "./accessor.js";
 import Fields from "./fields.js";
-import Method from "./method.js";
 
 /**
  * @typedef {import('./fields.js').Key} Key
@@ -174,16 +173,7 @@ export default class ClassDescriptor {
 			...parents.map(
 				p => view(p.prototype ?? {})
 			),
-			map(
-				prototype,
-				(key, method) => [
-					key,
-					is.object_literal(method) ?
-						Method(key, method) :
-						method
-				]
-			)
-			// prototype
+			prototype
 		);
 		defaults = concat(
 			...parents.map(

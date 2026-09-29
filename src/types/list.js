@@ -1,16 +1,6 @@
 import { MetaType, Constructor } from "../gem.js";
 
-/**
- * @callback MetaList
- * @param    {class}  T
- * @returns  {class}  List<T>
- */
-
-/**
- * @description Creates a class of type T[], where T is the class passed to List.
- * @type  {MetaList}
- */
-export const List = MetaType(
+export default MetaType(
 	"List<T>",
 	({ parents: [T] }) => Constructor.Abstract(
 		`List<${ T.name }>`
@@ -24,5 +14,3 @@ export const List = MetaType(
 		}
 	}
 );
-
-export default List;

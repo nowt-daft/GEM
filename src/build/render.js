@@ -221,10 +221,16 @@ export const render_method = (
 export const render_params =
 	method => method.params ?
 		Object.entries(method.params).map(
-			([param, type]) => {
-				const { name, is_nullable } =
-					type instanceof MetaDescriptor ?
-						type : type; // What a second... no effect?
+			([param, field]) => {
+				console.log('+'.repeat(60));
+				console.log(param);
+				console.log(type);
+				console.log('+'.repeat(60));
+
+				if (!(field instanceof MetaDescriptor))
+					return `${ param }: ${ field.name ?? 'unknown' }`;
+				
+				const { name, is_nullable } = field.type;
 				return `${ param }: ${ name }` + (is_nullable ? '?' : '')
 			}
 		).join(', ') :

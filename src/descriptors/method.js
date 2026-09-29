@@ -32,10 +32,6 @@ export default function Method(
 ) {
 	const fields = Fields.create(params);
 
-		console.log('-'.repeat(40))
-		console.log(fields)
-		console.log('-'.repeat(40))
-
 	return Object.defineProperties(
 		function(...args) {
 			const _type = this.constructor;
