@@ -1,0 +1,11 @@
+declare function _default(root_path: string, dts_path: string, js_path: string, source: string, T: ClassDescriptor, dts: string): string;
+export default _default;
+export function render_notice(root_path: any, dts_path: any, js_path: any, T: any): string;
+export function render_type(T: ClassDescriptor): string;
+export function render_fields(prescriptor: Record<string, MetaDescriptor<any>>): string;
+export function render_field(key: string, field: MetaDescriptor<any>): string;
+export function render_methods(T: ClassDescriptor): string;
+export function render_method(T: ClassDescriptor, key: string, method: Function): string;
+export function render_params(method: Function): string;
+import ClassDescriptor from "../descriptors/class.js";
+import MetaDescriptor from "../descriptors/meta.js";

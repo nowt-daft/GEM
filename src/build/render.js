@@ -74,8 +74,7 @@ export const render_notice = (
 	dts_path,
 	js_path,
 	T
-) => `
-/*
+) => `/*
  * 💎 GEM -> ${ diff(root_path, dts_path) }
  * 📜 ${ T.name }::${
 	(name => name == "Function" ? 'class' : name)(T.constructor.name)
@@ -223,7 +222,9 @@ export const render_params =
 	method => method.params ?
 		Object.entries(method.params).map(
 			([param, type]) => {
-				const { name, is_nullable } = type instanceof MetaDescriptor ? type.type : type;
+				const { name, is_nullable } =
+					type instanceof MetaDescriptor ?
+						type : type; // What a second... no effect?
 				return `${ param }: ${ name }` + (is_nullable ? '?' : '')
 			}
 		).join(', ') :

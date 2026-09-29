@@ -1,4 +1,4 @@
-import { open, save } from "../io/disk.js";
+import { open } from "../io/disk.js";
 import { diff } from "../io/path.js";
 import program from "./program.js";
 import render from "./render.js";
@@ -8,24 +8,44 @@ const TYPES_DIR = '@types/'
 const GEM_JS_EXT = '.gem.js';
 const GEM_DTS_EXT = '.gem.d.ts';
 
-/** @type {Map<string,string>} */
-const PROGRAM = new Map();
-
-function save_dts(
-	path,
-	dts
-) {
-	PROGRAM.set(path, dts);
-	// save(path, dts);
-}
-
 const [
 	runtime,
 	script,
 	project_dir = process.env.PWD
 ] = process.argv;
 
-// ## DEBUG ###########################
+const print = (
+	project_dir,
+	path
+) => {
+	const short_path = diff(project_dir, path).slice(1);
+	console.log(
+		'--',
+		short_path,
+		'-'.repeat(
+			Math.max(
+				0,
+				MAX_COL_WIDTH - 4 - short_path.length
+			)
+		)
+	);
+}
+
+const save = async (
+	project_dir,
+	path,
+	dts
+) => {
+	print(
+		project_dir,
+		path
+	);
+
+	console.log(dts);
+
+	// console.log('-'.repeat(40));
+	return Bun.write(path, dts);
+}
 
 console.log(`
 ${ '*'.repeat(MAX_COL_WIDTH) }
@@ -35,14 +55,10 @@ RUNTIME: ${ runtime }
 ${ '-'.repeat(MAX_COL_WIDTH) }
 `);
 
-// ## DONE ############################
-
 if (
 	!runtime.includes('bun') ||
 	script != import.meta.path
 ) process.exit(1);
-
-// ## PROGRAM START ###################
 
 program(
 	project_dir,
@@ -52,25 +68,16 @@ program(
 	) => {
 		if (
 			!path.endsWith(GEM_DTS_EXT)
-		)
-			return PROGRAM.set(
+		) {
+			print(
+				project_dir,
+				path
+			);
+			return await Bun.write(
 				path,
 				dts
 			);
-
-		// ## OVERRIDE .d.ts ##########
-
-		const short_path = diff(project_dir, path);
-		console.log(
-			'--',
-			short_path,
-			'-'.repeat(
-				Math.max(
-					0,
-					MAX_COL_WIDTH - 4 - short_path.length
-				)
-			)
-		);
+		}
 
 		const js_path =
 			path.replace(
@@ -81,27 +88,19 @@ program(
 				''
 			);
 
-		console.log(
-			dts = render(
-				project_dir,
-				path,
-				js_path,
-				await open(js_path),
-				(await import(js_path)).default,
-				dts
-			)
+		dts = render(
+			project_dir,
+			path,
+			js_path,
+			await open(js_path),
+			(await import(js_path)).default,
+			dts
 		);
-
-		save_dts(
+		
+		return save(
+			project_dir,
 			path,
 			dts
 		);
-
-		console.log(
-			'-- saved',
-			'-'.repeat(31)
-		);
-
-		// ## DONE ####################
 	}
 );
