@@ -17,10 +17,10 @@ import VarEvent from "../../types/events/var.js";
 
 /**
  * @template T
- * @class Var
- * @extends MetaDescriptor<T>
+ * @class    Variable
+ * @extends  MetaDescriptor<T>
  */
-export class Var extends MetaDescriptor {
+export class Variable extends MetaDescriptor {
 	/**
 	 * @param {new => T}     type
 	 * @param {Parser<T>}    parse
@@ -61,6 +61,38 @@ export class Var extends MetaDescriptor {
 			}
 		);
 		this.required;
+	}
+
+	/**
+	 * Create a var from a given type.
+	 *
+	 * @param    {new => T}  type
+	 * @returns  {Variable<T>}  this
+	 */
+	static type(type) {
+		return new Variable(type);
+	}
+
+	/**
+	 * Create a var by inferring type from a given value.
+	 *
+	 * @param    {T}  value
+	 * @returns  {Variable<T>}  this
+	 */
+	static from(value) {
+		return new Variable(
+			value.constructor
+		).assign(value);
+	}
+
+	/**
+	 * Create a required var from a given type.
+	 *
+	 * @param    {new => T}  type
+	 * @returns  {Variable<T>}  this
+	 */
+	static required(type) {
+		return new Variable(type).required;
 	}
 }
 

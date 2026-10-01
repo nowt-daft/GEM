@@ -177,7 +177,7 @@ export default new class is extends TypeOf {
 	method(func) {
 		return (
 			this.function(func) &&
-			this.object_literal(func.params) || (
+			this.object_literal(func.params) || this.class(func.returns) || (
 				this.undefined(func.prototype) &&
 				func.name !== "" &&
 				func.toString().startsWith(func.name)
@@ -185,7 +185,7 @@ export default new class is extends TypeOf {
 		);
 	}
 	/**
-	 * @param    {class|function} type
+	 * @param    {(new *)|Function}  type
 	 * @returns  {boolean}  Type can be a function or a class.
 	 */
 	constructable(type) {
@@ -197,7 +197,7 @@ export default new class is extends TypeOf {
 		);
 	}
 	/**
-	 * @param    {class}    type
+	 * @param    {new *}    type
 	 * @returns  {boolean}  Type is a class and not just a function.
 	 */
 	class(type) {

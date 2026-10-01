@@ -1,2 +1,2 @@
-declare const _default: () => class;
+declare const _default: () => new () => any;
 export default _default;

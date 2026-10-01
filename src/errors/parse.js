@@ -1,10 +1,13 @@
 import { tag } from "../utils/tagify.js";
 import GenericError from "./generic.js";
 
+/**
+ * @template T
+ */
 export default class ParseError extends GenericError {
 	/**
-	 * @param {class}  type
-	 * @param {any}    value
+	 * @param  {new T}  type
+	 * @param  {any}    value
 	 */
 	constructor(
 		type,

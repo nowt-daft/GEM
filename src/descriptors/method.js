@@ -14,16 +14,12 @@ import Properties from "./properties.js";
 const REST = "...";
 
 /**
- * @typedef {class} Type
- */
-
-/**
  * @function  Method
- * @param     {string}               name
- * @param     {object}               definition
- * @param     {Record<string,Type>}  [definition.params]
- * @param     {Function}             definition.method
- * @param     {Type}                 [definition.returns=undefined]
+ * @param     {string}                  name
+ * @param     {object}                  definition
+ * @param     {Record<string,new => *}  definition.params
+ * @param     {Function}                definition.method
+ * @param     {new => *}                definition.returns
  * @returns   {Function}
  */
 export default function Method(

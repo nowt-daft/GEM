@@ -55,15 +55,15 @@ declare const _default: {
      */
     method(func: any): Function;
     /**
-     * @param    {class|function} type
+     * @param    {(new *)|Function}  type
      * @returns  {boolean}  Type can be a function or a class.
      */
-    constructable(type: class | Function): boolean;
+    constructable(type: (new () => any) | Function): boolean;
     /**
-     * @param    {class}    type
+     * @param    {new *}    type
      * @returns  {boolean}  Type is a class and not just a function.
      */
-    class(type: class): boolean;
+    class(type: new () => any): boolean;
     /**
      * Check if type1 is the same type or a derivative type of type2.  In other
      * words, is type2 the same or a parent type of type1.

@@ -3,13 +3,13 @@ export namespace PROTOTYPE {
      * Method for inheriting from some specific parent by passing this
      * instance and any arguments to the parent's init method.
      *
-     * @param    {class}       parent
+     * @param    {new T}       parent
      * @param    {...*}        args
      * @returns  {typeof this} this
      *
      * @throws   {InheritError}
      */
-    export function inherit(parent: class, ...args: any[]): typeof this;
+    export function inherit(parent: new () => T, ...args: any[]): typeof this;
     /**
      * Inherit from all parents at once by passing an Array of arguments
      * which corresponds to each parent of the type, in order.

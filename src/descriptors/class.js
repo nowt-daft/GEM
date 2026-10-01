@@ -64,6 +64,7 @@ const PROPERTIES_DESCRIPTOR = {
 };
 
 /**
+ * @template T
  * @mixin
  */
 export const PROTOTYPE = {
@@ -71,7 +72,7 @@ export const PROTOTYPE = {
 	 * Method for inheriting from some specific parent by passing this
 	 * instance and any arguments to the parent's init method.
 	 *
-	 * @param    {class}       parent
+	 * @param    {new T}       parent
 	 * @param    {...*}        args
 	 * @returns  {typeof this} this
 	 *
@@ -137,7 +138,7 @@ export default class ClassDescriptor {
 	 * @param {...object} prescriptors
 	 */
 	constructor(...prescriptors) {
-		let [parents, prescriptor] = [
+		let [parents, prescriptor = {}] = [
 			is.array(prescriptors.at(0)) ?
 				prescriptors.shift() :
 				[],
@@ -171,7 +172,9 @@ export default class ClassDescriptor {
 		prototype = concat(
 			PROTOTYPE,
 			...parents.map(
-				p => view(p.prototype ?? {})
+				p => (
+					p == globalThis.HTMLElement || p == globalThis.Element
+				) ? {} : view(p.prototype ?? {})
 			),
 			prototype
 		);
@@ -233,7 +236,7 @@ export default class ClassDescriptor {
 					is.object_literal(value)
 				) {
 					if (
-						is.object_literal(value.params) &&
+						is.object_literal(value) &&
 						is.method(value.method) &&
 						is.class(value.returns)
 					)

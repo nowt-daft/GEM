@@ -5,12 +5,16 @@ const STAR = '*';
 const MAYBE = '?';
 const EMPTY = '';
 
+/**
+ * @template T
+ * @template U
+ */
 export default class AssignmentError extends GenericError {
 	/**
-	 * @param {class} type
+	 * @param {new T} type
 	 * @param {string|symbol} key
 	 * @param {any} value
-	 * @param {class} property_type
+	 * @param {new U} property_type
 	 * @param {boolean} required
 	 * @param {boolean} nullable
 	 */

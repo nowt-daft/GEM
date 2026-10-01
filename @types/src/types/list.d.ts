@@ -18,49 +18,49 @@ declare const _default: {
      *     at least TWO parents.
      *
      * @overload
-     * @param    {string|Name}    name  Name for the constructor to have
-     * @param    {class[]}        parents  Any parent types to extend/inherit.
-     * @param    {object}         definition  Properties, methods, listeners, etc.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {string|Name}  name  Name for the constructor to have
+     * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+     * @param    {object}       definition  Properties, methods, listeners, etc.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (name: string | import("../gem.js").Name, parents: class[], definition: object): class;
+    (name: string | import("../gem.js").Name, parents: (new () => any)[], definition: object): new () => any;
     /**
      * @overload
-     * @param    {string|Name}    name  Name for the constructor to have
-     * @param    {object}         definition  Properties, methods, listeners, etc.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {string|Name}  name  Name for the constructor to have
+     * @param    {object}       definition  Properties, methods, listeners, etc.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (name: string | import("../gem.js").Name, definition: object): class;
+    (name: string | import("../gem.js").Name, definition: object): new () => any;
     /**
      * @overload
-     * @param    {string|Name}    name  Name for the constructor to have
-     * @param    {class[]}        parents Any parent types to extend/inherit.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {string|Name}  name  Name for the constructor to have
+     * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (name: string | import("../gem.js").Name, parents: class[]): class;
+    (name: string | import("../gem.js").Name, parents: (new () => any)[]): new () => any;
     /**
      * @overload
-     * @param    {class[]}        parents Any parent types to extend/inherit.
-     * @param    {object}         definition  Properties, methods, listeners, etc.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+     * @param    {object}     definition  Properties, methods, listeners, etc.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (parents: class[], definition: object): class;
+    (parents: (new () => any)[], definition: object): new () => any;
     /**
      * @overload
-     * @param    {class[]}        parents Any parent types to extend/inherit.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (parents: class[]): class;
+    (parents: (new () => any)[]): new () => any;
     /**
      * @overload
-     * @param    {object}         definition  Properties, methods, listeners, etc.
-     * @returns  {class}          Defined constructor/class.
+     * @param    {object}  definition  Properties, methods, listeners, etc.
+     * @returns  {new *}  Defined constructor/class.
      */
-    (definition: object): class;
+    (definition: object): new () => any;
     /**
      * @overload
-     * @returns  {class}          Generic Constructor/class.
+     * @returns  {new *}  Generic Constructor/class.
      */
-    (): class;
+    (): new () => any;
 };
 export default _default;

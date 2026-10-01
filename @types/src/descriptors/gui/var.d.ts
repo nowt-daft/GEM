@@ -12,10 +12,31 @@
  */
 /**
  * @template T
- * @class Var
- * @extends MetaDescriptor<T>
+ * @class    Variable
+ * @extends  MetaDescriptor<T>
  */
-export class Var<T> extends MetaDescriptor<T> {
+export class Variable<T> extends MetaDescriptor<T> {
+    /**
+     * Create a var from a given type.
+     *
+     * @param    {new => T}  type
+     * @returns  {Variable<T>}  this
+     */
+    static type(type: new () => T): Variable<T>;
+    /**
+     * Create a var by inferring type from a given value.
+     *
+     * @param    {T}  value
+     * @returns  {Variable<T>}  this
+     */
+    static from(value: T): Variable<T>;
+    /**
+     * Create a required var from a given type.
+     *
+     * @param    {new => T}  type
+     * @returns  {Variable<T>}  this
+     */
+    static required(type: new () => T): Variable<T>;
     /**
      * @param {new => T}     type
      * @param {Parser<T>}    parse

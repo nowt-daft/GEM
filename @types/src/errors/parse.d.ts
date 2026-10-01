@@ -1,8 +1,11 @@
-export default class ParseError extends GenericError {
+/**
+ * @template T
+ */
+export default class ParseError<T> extends GenericError {
     /**
-     * @param {class}  type
-     * @param {any}    value
+     * @param  {new T}  type
+     * @param  {any}    value
      */
-    constructor(type: class, value: any);
+    constructor(type: new () => T, value: any);
 }
 import GenericError from "./generic.js";

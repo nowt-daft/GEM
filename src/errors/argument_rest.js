@@ -1,12 +1,16 @@
 import GenericError from "./generic.js";
 import { tag, tagify } from "../utils/tagify.js";
 
+/**
+ * @template T
+ * @template U
+ */
 export default class RestArgumentError extends GenericError {
 	/**
-	 * @param  {class}       type
+	 * @param  {new T}       type
 	 * @param  {string}      method_name
 	 * @param  {string}      param_name
-	 * @param  {class}       param_type
+	 * @param  {new U}       param_type
 	 * @param  {Array<any>}  rest_args
 	 */
 	constructor(

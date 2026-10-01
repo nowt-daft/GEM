@@ -1,14 +1,15 @@
-import { view_prototype } from "../types/object.js";
+import { view_prototype, view } from "../types/object.js";
 import { diff } from "../io/path.js";
 import is from "../utils/is.js";
 
-import ClassDescriptor from "../descriptors/class.js";
+import { FixedProperty } from "../descriptors/property.js";
 import MetaDescriptor from "../descriptors/meta.js";
 import { Get } from "../descriptors/accessor.js";
 import { GetDescriptor } from "../descriptors/getter.js";
+import ClassDescriptor from "../descriptors/class.js";
 import { MetaType } from "../gem.js";
 
-import { parse_args, parse_returns } from "../utils/tagify.js";
+import tagify, { parse_args, parse_returns } from "../utils/tagify.js";
 
 const TAB = '\t';
 const NEWLINE = '\n';
@@ -22,6 +23,31 @@ const HTML_CALLBACKS = [
 	'disconnectedCallback',
 	'renderCallback'
 ];
+const STATIC_IGNORES = [
+	'name',
+	'length',
+	'defaults',
+	'parents',
+	'prescriptor',
+	'properties',
+	'prototype',
+	'listeners',
+	'static',
+	'defines',
+	// 'expression'
+];
+
+const TYPE_CONVERSIONS = {
+	Boolean: "boolean",
+	Symbol: "symbol",
+	Number: "number",
+	BigInt: "bigint",
+	String: "string",
+	Object: "object",
+	Void: "void",
+	Any: "any",
+	// Either, Callback, Function?
+};
 
 /**
  * @param    {string}  root_path   Project root directory
@@ -123,6 +149,8 @@ export const render_type = T => {
 		render_fields(prescriptor)
 	}${ NEWLINE.repeat(2) }${
 		render_methods(T)
+	}${ NEWLINE.repeat(2) }${
+		render_statics(T)
 	}${ NEWLINE }${ BLOCK_END }`;
 }
 
@@ -152,15 +180,16 @@ export const render_field = (
 	key,
 	field
 ) => {
-	const { type, is_private, is_nullable } = field;
+	const { type, is_private, is_nullable, writable, enumerable, get } = field;
 
-	const prefix = is_private ? 'private ' : '';
-	const readonly =
+	const prefix = is_private || !enumerable ? 'private ' : '';
+	const getter =
 		field instanceof GetDescriptor ||
-			field instanceof Get;
+			field instanceof Get || get;
+	const readonly = field instanceof FixedProperty || !writable;
 	const label =
-		readonly ?
-			`get ${ key }()` :
+		(readonly || getter) ?
+			(getter ? `get ${ key }()` : `readonly ${ key }`) :
 			(key + (is_nullable ? '?' : ''));
 	const rtrn = (
 		is.lamda(type) ? type() : type
@@ -211,7 +240,7 @@ export const render_method = (
 		key
 	}${ GROUP_START }${
 		render_params(method)
-	}${ GROUP_END }: ${ rtrns }`;
+	}${ GROUP_END }: ${ render_type_name(rtrns) }`;
 }
 
 /**
@@ -222,16 +251,42 @@ export const render_params =
 	method => method.params ?
 		Object.entries(method.params).map(
 			([param, field]) => {
-				console.log('+'.repeat(60));
-				console.log(param);
-				console.log(type);
-				console.log('+'.repeat(60));
-
-				if (!(field instanceof MetaDescriptor))
+				if (
+					!(field instanceof MetaDescriptor)
+				)
 					return `${ param }: ${ field.name ?? 'unknown' }`;
 				
-				const { name, is_nullable } = field.type;
-				return `${ param }: ${ name }` + (is_nullable ? '?' : '')
+				const null_suffix = field.is_nullable ? '?' : '';
+				const type = render_type_name(field.type.name);
+				
+				return `${ param }${ null_suffix }: ${ type }`
 			}
 		).join(', ') :
 		parse_args(method);
+
+/**
+ * @param    {string}  type_name
+ * @returns  {string}  Modified name better suited for .d.ts files
+ */
+export const render_type_name = type_name => TYPE_CONVERSIONS[type_name] ?? type_name;
+
+export const render_statics = T => {
+	const statics = Object.entries(
+		T
+	)
+		.filter(
+			([key]) => !STATIC_IGNORES.includes(key)
+		);
+	return statics.map(
+			([
+				key,
+				value
+			]) => {
+				if (is.method(value))
+					return `${ TAB }static ${ render_method(T, key, value) };`;
+
+				value = { ...Object.getOwnPropertyDescriptor(T, key), type: value.constructor };
+				return `${ TAB }static ${ render_field(key, value) };`;
+			}
+	).join(NEWLINE);
+}

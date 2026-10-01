@@ -1,6 +1,5 @@
 import {
 	concat,
-	// view,
 	forEach,
 	filter,
 	build,
@@ -10,7 +9,6 @@ import {
 import is from './utils/is.js';
 import {
 	capitalise,
-	// is_capital
 } from './utils/string.js';
 
 import Properties from './descriptors/properties.js';
@@ -18,13 +16,12 @@ import Accessor from './descriptors/accessor.js';
 import Fields from './descriptors/fields.js';
 import Field from './descriptors/field.js';
 
-import { Attribute } from './descriptors/gui/attribute.js';
-import { Var } from './descriptors/gui/var.js';
+import Attr, { Attribute } from './descriptors/gui/attribute.js';
+import Var, { Variable } from './descriptors/gui/var.js';
+export { Attr, Var };
 
 import {
 	MetaType,
-	// Source as Class,
-	// Abstract
 } from './gem.js';
 
 import GenericEvent from './types/events/generic.js';
@@ -37,7 +34,6 @@ import ComponentDefinitionError from
 	'./errors/component_definition.js';
 
 const HTML = 'HTML';
-// const ELEMENT = 'Element';
 
 const CONNECTED = 'connected';
 const DISCONNECTED = 'disconnected';
@@ -222,7 +218,8 @@ const HTMLPrototype = {
 			);
 
 			return this;
-		}
+		},
+		returns: HTMLElement
 	},
 
 	dispatch: {
@@ -337,10 +334,10 @@ Object.defineProperties(
  * @callback DefineComponent
  *
  * @param {string}              tag        HTML tag
- * @param {class[]}             parents    Parent classes
- * @param {Record<string,any>} definition
+ * @param {(new *)[]}           parents    Parent classes
+ * @param {Record<string,any>}  definition
  *
- * @returns {HTMLComponent}
+ * @returns {HTMLElement}
  */
 /** @type {DefineComponent} */
 export const Component = MetaType(
@@ -370,17 +367,14 @@ export const Component = MetaType(
 		const class_name = names.map(
 			str => capitalise(str)
 		).join('');
-		
-		// TODO: attributes, variables, and listeners all sorta
-		// have something in common, this needs re-evaluated to
-		// some extent... revisit soon...
+
 		const attributes = filter(
 			prescriptor,
 			(_, field) => field instanceof Attribute
 		);
 		const variables = filter(
 			prescriptor,
-			(_, field) => field instanceof Var
+			(_, field) => field instanceof Variable
 		);
 		const each_listener = callback =>
 			forEach(
@@ -468,7 +462,7 @@ export const Component = MetaType(
 					);
 					forEach(
 						variables,
-						key => this[key] = this.attr(key)
+						key => this[key] = this.var(key)
 					);
 
 					this.dispatch(RENDER);
@@ -483,4 +477,3 @@ export const Component = MetaType(
 		}[class_name];
 	}
 );
-

@@ -1,17 +1,36 @@
 import is from "./utils/is.js";
 import { init, construct, map } from "./types/object.js";
 
+import Descriptor from "./descriptors/descriptor.js";
+import MetaDescriptor from "./descriptors/meta.js";
+import Property from "./descriptors/property.js";
 import Properties from "./descriptors/properties.js";
-import ClassDescriptor from "./descriptors/class.js";
+import { Field } from "./descriptors/field.js";
+export { default as Field } from "./descriptors/field.js";
 import Method from "./descriptors/method.js";
+
+import ClassDescriptor from "./descriptors/class.js";
 
 import MetaTypeError from "./errors/metatype.js";
 import AbstractError from "./errors/abstract.js";
 
-export { default as Field } from "./descriptors/field.js";
 
 import bootstrap from "./misc/bootstrap.js";
 import ArgumentError from "./errors/argument.js";
+
+const to_descriptors = (key, value) => [
+	key,
+	(
+		is.object_literal(value) &&
+		is.method(value.method) &&
+		is.class(value.returns)
+	) ? Property.fixed(Method(key, value), true) :
+		value instanceof MetaDescriptor ? value.init(key) :
+			is.class(value) ? Field.type(value).init(key) :
+				value instanceof Descriptor ? value :
+					Property.fixed(value, true)
+
+];
 
 /**
  * @mixin
@@ -98,7 +117,7 @@ export const STATIC = {
  * @callback ConstructorFormatter
  * @param    {string}  name  Name of the class/type.
  * @param    {ClassDescriptor}  descriptor  Info about type (parents, properties, etc.)
- * @returns  {class}  Factory that builds types/constructors/classes.
+ * @returns  {new *}  Factory that builds types/constructors/classes.
  */
 
 /**
@@ -126,43 +145,43 @@ export const STATIC = {
  *     at least TWO parents.
  *
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {class[]}        parents  Any parent types to extend/inherit.
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @returns  {class}          Defined constructor/class.
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  *//**
  * @overload
- * @returns  {class}          Generic Constructor/class.
+ * @returns  {new *}  Generic Constructor/class.
  */
 function TypeConstructor() {};
 
 export class Constructor {
 	/**
 	 * @param    {string}  name  Name for the object constructor.
-	 * @returns  {class}   Constructor for building objects.
+	 * @returns  {new *}   Constructor for building objects.
 	 */
 	static Object(name) {
 		const constructor = {
@@ -186,7 +205,7 @@ export class Constructor {
 
 	/**
 	 * @param    {string}  name  Name for the class to have.
-	 * @returns  {class}   Class for building objects.
+	 * @returns  {new *}   Class for building objects.
 	 */
 	static Class(name) {
 		return {
@@ -205,9 +224,9 @@ export class Constructor {
 	}
 
 	/**
-	 * @param    {class}   base   Base class to directly extend.
+	 * @param    {new *}   base   Base class to directly extend.
 	 * @param    {string}  name   Name for the child class to have.
-	 * @returns  {class}  Class for building objects.
+	 * @returns  {new *}  Class for building objects.
 	 */
 	static Extend(
 		base,
@@ -225,11 +244,11 @@ export class Constructor {
 
 	/**
 	 * @param    {string}  name  Name for the abstract to have.
-	 * @returns  {class}  The abstract class..
+	 * @returns  {new *}  The abstract class..
 	 */
 	static Abstract(name) {
 		const abstract = {
-			[name]: class Abstract {
+			[name]: class {
 				constructor() {
 					if (this.constructor === abstract)
 						throw new AbstractError(name);
@@ -241,6 +260,8 @@ export class Constructor {
 }
 
 /**
+ * @template T
+ *
  * GEMify your existing types!
  * Adds some static properties for:
  *     + validation
@@ -249,8 +270,8 @@ export class Constructor {
  *     + type-checking
  *     + etc.
  *
- * @param    {class}  type
- * @returns  {class}  Modified class "type"
+ * @param    {T}  type
+ * @returns  {T}  Modified class "type"
  */
 export function Gemify(
 	type
@@ -300,6 +321,29 @@ export function MetaType(
 		) {
 			// Restart TypeBuilder but use the
 			// meta_name as the Type's name:
+
+			if (
+				!is.string(name)
+			) {
+				if (is.class(name))
+					return TypeBuilder(
+						meta_name,
+						[name],
+						...prescriptors
+					);
+
+				if (
+					is.object_literal(name) || (
+						is.array(name) && name.every(x => is.class(x))
+					)
+				)
+					return TypeBuilder(
+						meta_name,
+						name,
+						...prescriptors
+					);
+			}
+
 			if (
 				(
 					!is.string(name) && is.array(name) &&
@@ -340,53 +384,65 @@ export function MetaType(
 					}
 				);
 
+			// TODO: REVISIT -- WHAT DID THIS SOLVE FOR US *EXACTLY*?
+			// EXCEPT FOR THE STATICS, OF COURSE...
 			Object.defineProperties(
 				constructor,
-				Properties.fixed(
-					{
-						...STATIC,
-						...statics,
-						parents: [
-							...constructor.parents ?? [],
-							...parents
-						],
-						prescriptor: {
-							...constructor.prescriptor ?? {},
-							...prescriptor
+				{
+					...map(
+						STATIC,
+						to_descriptors
+					),
+					...map(
+						statics,
+						to_descriptors
+					),
+					...Properties.fixed(
+						{
+							parents: [
+								...constructor.parents ?? [],
+								...parents
+							],
+							prescriptor: {
+								...constructor.prescriptor ?? {},
+								...prescriptor
+							},
+							properties: {
+								...constructor.properties ?? {},
+								...properties
+							},
+							defaults: {
+								...constructor.defaults ?? {},
+								...defaults
+							},
+							// TODO: THIS IS PROBABLY WRONG
+							listeners: {
+								...constructor.listeners ?? {},
+								...listeners
+							},
+							constructor: TypeBuilder,
 						},
-						properties: {
-							...constructor.properties ?? {},
-							...properties
-						},
-						defaults: {
-							...constructor.defaults ?? {},
-							...defaults
-						},
-						listeners: {
-							...constructor.listeners ?? {},
-							...listeners
-						},
-						constructor: TypeBuilder,
-					},
-					false
-				)
+						false
+					)
+				}
 			);
 
 			Object.defineProperties(
 				constructor.prototype,
-				Properties.fixed(
+				// Properties.fixed(
 					map(
 						prototype,
-						(key, method) => [
-							key,
-							is.object_literal(method) ?
-								Method(key, method) :
-								method
-						]
+						to_descriptors
+						// (key, method) => [
+						// 	key,
+						// 	is.object_literal(method) ?
+						// 		Method(key, method) :
+						// 		method
+						// ]
 					),
 					// prototype,
-					false
-				)
+					// false
+				// )
 			);
 
 			return is.global(this) ?

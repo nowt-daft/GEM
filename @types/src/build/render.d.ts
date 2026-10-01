@@ -7,5 +7,7 @@ export function render_field(key: string, field: MetaDescriptor<any>): string;
 export function render_methods(T: ClassDescriptor): string;
 export function render_method(T: ClassDescriptor, key: string, method: Function): string;
 export function render_params(method: Function): string;
+export function render_type_name(type_name: string): string;
+export function render_statics(T: any): string;
 import ClassDescriptor from "../descriptors/class.js";
 import MetaDescriptor from "../descriptors/meta.js";

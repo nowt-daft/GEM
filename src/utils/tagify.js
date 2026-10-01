@@ -68,10 +68,10 @@ export const parse_returns = func => {
 }
 
 const TAGGERS = {
-	undefined: () => 'UNDEFINED',
-	null:      () => 'NULL',
+	undefined: () => 'undefined',
+	null:      () => 'null',
 
-	boolean:   x => x ? 'TRUE' : 'FALSE',
+	boolean:   x => x ? 'true' : 'false',
 	string:    x => `"${ x }"`,
 	
 	number:    x =>
@@ -80,7 +80,7 @@ const TAGGERS = {
 			`${ x }`,
 	bigint:    x => `${ x }n`,
 	
-	symbol:    x => `symbol ${ x.description ?? "" }`.trim(),
+	symbol:    x => `Symbol("${ x.description ?? "" }")`.trim(),
 
 	function:  x =>
 		is.class(x) ?
@@ -118,7 +118,7 @@ const TAGGERS = {
  * @param    {any}     value
  * @returns  {string}  Representation of the value based on its type.
  */
-export const tagify = value => TAGGERS?.[typeof value](value) ?? 'UNKNOWN';
+export const tagify = value => TAGGERS?.[typeof value](value) ?? 'unknown';
 
 /**
  * This is a string template function.

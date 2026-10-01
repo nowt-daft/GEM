@@ -8,7 +8,7 @@ import AttributeEvent from "../../types/events/attribute.js";
  * @param    {object}   data
  * @param    {object}   data.target  Object on which the property's value changed.
  * @param    {string}   data.key     The key of the property.
- * @param    {new => T} data.type    The type <T> of the property.
+ * @param    {new T}    data.type    The type <T> of the property.
  * @param    {T}        data.from    The previous value of the property.
  * @param    {T}        data.to      The new value of the property.
  *
@@ -17,13 +17,13 @@ import AttributeEvent from "../../types/events/attribute.js";
 
 /**
  * @template T
- * @class Attribute
- * @extends MetaDescriptor<T>
+ * @class    Attribute
+ * @extends  MetaDescriptor<T>
  */
 export class Attribute extends MetaDescriptor {
 	/**
-	 * @param  {class}              type
-	 * @param  {AttributeChange<T>} [onchange]
+	 * @param  {T}  type
+	 * @param  {AttributeChange<T>}  [onchange]
 	 */
 	constructor(
 		type,
@@ -56,6 +56,38 @@ export class Attribute extends MetaDescriptor {
 				);
 			}
 		);
+	}
+
+	/**
+	 * Create a attribute from a given type.
+	 *
+	 * @param    {new => T}  type
+	 * @returns  {Attribute<T>}  this
+	 */
+	static type(type) {
+		return new Attribute(type);
+	}
+
+	/**
+	 * Create a attribute by inferring type from a given value.
+	 *
+	 * @param    {T}  value
+	 * @returns  {Attribute<T>}  this
+	 */
+	static from(value) {
+		return new Attribute(
+			value.constructor
+		).assign(value);
+	}
+
+	/**
+	 * Create a required attribute from a given type.
+	 *
+	 * @param    {new => T}  type
+	 * @returns  {Attribute<T>}  this
+	 */
+	static required(type) {
+		return new Attribute(type).required;
 	}
 }
 

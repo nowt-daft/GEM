@@ -1,9 +1,12 @@
 import { tag } from "../utils/tagify.js";
 import GenericError from "./generic.js";
 
+/**
+ * @template T
+ */
 export default class ReadOnlyError extends GenericError {
 	/**
-	 * @param    {class}  type
+	 * @param    {new T}  type
 	 * @param    {string|symbol}  key
 	 */
 	constructor(

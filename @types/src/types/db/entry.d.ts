@@ -1,4 +1,6 @@
-export default class Entry {
+declare const Entry_base: new () => any;
+export default class Entry extends Entry_base {
+    [x: string]: any;
     /**
      * @param  {object}  data  Any object instance will do.
      */
@@ -29,3 +31,4 @@ export default class Entry {
     valueOf(): string;
     [Symbol.toPrimitive](hint: any): any;
 }
+export {};

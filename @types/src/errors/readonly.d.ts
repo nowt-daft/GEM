@@ -1,8 +1,11 @@
-export default class ReadOnlyError extends GenericError {
+/**
+ * @template T
+ */
+export default class ReadOnlyError<T> extends GenericError {
     /**
-     * @param    {class}  type
+     * @param    {new T}  type
      * @param    {string|symbol}  key
      */
-    constructor(type: class, key: string | symbol);
+    constructor(type: new () => T, key: string | symbol);
 }
 import GenericError from "./generic.js";

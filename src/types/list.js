@@ -1,9 +1,12 @@
 import { MetaType, Constructor } from "../gem.js";
 
 export default MetaType(
-	"List<T>",
-	({ parents: [T] }) => Constructor.Abstract(
-		`List<${ T.name }>`
+	"T[]",
+	(
+		_,
+		{ parents: [{ name }] }
+	) => Constructor.Abstract(
+		`${ name }[]`
 	),
 	{
 		defines(instance) {

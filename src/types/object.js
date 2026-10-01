@@ -236,9 +236,9 @@ export const view = Object.view =
 		ignore_list = [
 			'__proto__',
 			'constructor',
-			// 'init', keep??
-			'inherit',
-			'super',
+			// 'init',
+			// 'inherit',
+			// 'super',
 			...ignore_list
 		];
 		return filter(
@@ -257,21 +257,22 @@ export const view = Object.view =
  * @returns  {Record<Key,Function>}  Dictionary of methods
  */
 export const view_prototype = Object.view_prototype =
-	(type, output = []) => {
+	({ prototype, __proto__: supertype }, output = []) => {
 		output = [
 			...Object.entries(
-				view(type.prototype)
+				view(prototype)
 			),
 			...output
 		];
 
 		if (
-			type.__proto__ === Object.__proto__ ||
-			type.__proto__.name === 'HTMLElement'
+			supertype === Object.__proto__ ||
+			globalThis.HTMLElement == supertype ||
+			globalThis.Element == supertype
 		)
 			return Object.fromEntries(output);
 
-		return view_prototype(type.__proto__, output);
+		return view_prototype(supertype, output);
 	}
 
 /**

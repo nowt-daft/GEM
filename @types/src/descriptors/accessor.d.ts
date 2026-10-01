@@ -49,8 +49,8 @@ export default class Accessor extends Descriptor {
     static GetSet(get: Getter, set: Setter, enumerable?: boolean): Get;
     /**
      * @param  {object}  descriptor  Get/Set Object
-     * @param      {DescriptorGetter}  descriptor.get
-     * @param      {DescriptorSetter}  [descriptor.set]
+     * @param  {DescriptorGetter}  descriptor.get
+     * @param  {DescriptorSetter}  [descriptor.set]
      * @param  {boolean}  enumerable
      */
     constructor(descriptor: {

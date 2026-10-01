@@ -1,18 +1,14 @@
 /**
- * @typedef {class} Type
- */
-/**
  * @function  Method
- * @param     {string}               name
- * @param     {object}               definition
- * @param     {Record<string,Type>}  [definition.params]
- * @param     {Function}             definition.method
- * @param     {Type}                 [definition.returns=undefined]
+ * @param     {string}                  name
+ * @param     {object}                  definition
+ * @param     {Record<string,new => *}  definition.params
+ * @param     {Function}                definition.method
+ * @param     {new => *}                definition.returns
  * @returns   {Function}
  */
 export default function Method(name: string, { params, method, returns }: {
-    params?: Record<string, class> | undefined;
+    params: Record<string, new () => any>;
     method: Function;
-    returns?: any;
+    returns: new () => any;
 }): Function;
-export type Type = class;

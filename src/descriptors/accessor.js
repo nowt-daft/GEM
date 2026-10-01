@@ -40,8 +40,8 @@ export default class Accessor extends Descriptor {
 
 	/**
 	 * @param  {object}  descriptor  Get/Set Object
-	 * @param      {DescriptorGetter}  descriptor.get
-	 * @param      {DescriptorSetter}  [descriptor.set]
+	 * @param  {DescriptorGetter}  descriptor.get
+	 * @param  {DescriptorSetter}  [descriptor.set]
 	 * @param  {boolean}  enumerable
 	 */
 	constructor(

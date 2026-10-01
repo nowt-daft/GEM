@@ -6,7 +6,7 @@ export function map(object: object, mapper: Mapper): object;
 export function filter(object: object, filterer: Filter): object;
 export function sort(object: object, sorter: Sort, buckets?: number | any[] | undefined): object[];
 export function view(object: object, ignore_list?: string[]): object;
-export function view_prototype(type: class, output?: any[]): Record<Key, Function>;
+export function view_prototype({ prototype, __proto__: supertype }: class, output?: any[]): Record<Key, Function>;
 export function init<T extends class>(target: object, type: new () => T, ...args: any[]): T;
 export function verify<T extends class>(target: object, type?: (new () => T) | undefined): object;
 export function build<T extends class>(target: object, ...args: any[]): T;

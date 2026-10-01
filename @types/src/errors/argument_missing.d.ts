@@ -1,10 +1,14 @@
-export default class MissingArgumentError extends GenericError {
+/**
+ * @template T
+ * @template U
+ */
+export default class MissingArgumentError<T, U> extends GenericError {
     /**
-     * @param  {class}   type
+     * @param  {new T}   type
      * @param  {string}  method_name
      * @param  {string}  param_name
-     * @param  {class}   param_type
+     * @param  {new U}   param_type
      */
-    constructor(type: class, method_name: string, param_name: string, param_type: class);
+    constructor(type: new () => T, method_name: string, param_name: string, param_type: new () => U);
 }
 import GenericError from "./generic.js";

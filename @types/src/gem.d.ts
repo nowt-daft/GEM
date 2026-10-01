@@ -1,4 +1,6 @@
 /**
+ * @template T
+ *
  * GEMify your existing types!
  * Adds some static properties for:
  *     + validation
@@ -7,10 +9,10 @@
  *     + type-checking
  *     + etc.
  *
- * @param    {class}  type
- * @returns  {class}  Modified class "type"
+ * @param    {T}  type
+ * @returns  {T}  Modified class "type"
  */
-export function Gemify(type: class): class;
+export function Gemify<T>(type: T): T;
 /**
  * A factory for producing Meta-Types/Super-Classes (types of types)
  *
@@ -75,25 +77,25 @@ export const STATIC: {
 export class Constructor {
     /**
      * @param    {string}  name  Name for the object constructor.
-     * @returns  {class}   Constructor for building objects.
+     * @returns  {new *}   Constructor for building objects.
      */
-    static Object(name: string): class;
+    static Object(name: string): new () => any;
     /**
      * @param    {string}  name  Name for the class to have.
-     * @returns  {class}   Class for building objects.
+     * @returns  {new *}   Class for building objects.
      */
-    static Class(name: string): class;
+    static Class(name: string): new () => any;
     /**
-     * @param    {class}   base   Base class to directly extend.
+     * @param    {new *}   base   Base class to directly extend.
      * @param    {string}  name   Name for the child class to have.
-     * @returns  {class}  Class for building objects.
+     * @returns  {new *}  Class for building objects.
      */
-    static Extend(base: class, name: string): class;
+    static Extend(base: new () => any, name: string): new () => any;
     /**
      * @param    {string}  name  Name for the abstract to have.
-     * @returns  {class}  The abstract class..
+     * @returns  {new *}  The abstract class..
      */
-    static Abstract(name: string): class;
+    static Abstract(name: string): new () => any;
 }
 /**
  * Generate a GENERIC Type. Creates a class that can
@@ -193,7 +195,7 @@ export const Source: typeof TypeConstructor;
  * @type {TypeConstructor}
  */
 export const Interface: typeof TypeConstructor;
-export type ConstructorFormatter = (name: string, descriptor: ClassDescriptor) => class;
+export type ConstructorFormatter = (name: string, descriptor: ClassDescriptor) => new () => any;
 export type Name = (descriptor: ClassDescriptor) => string;
 /**
  * A Type Factory helps us define Types ad generate them.  This
@@ -214,48 +216,48 @@ export type Name = (descriptor: ClassDescriptor) => string;
  *     at least TWO parents.
  *
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {class[]}        parents  Any parent types to extend/inherit.
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(name: string | Name, parents: class[], definition: object): class;
+declare function TypeConstructor(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
 /**
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(name: string | Name, definition: object): class;
+declare function TypeConstructor(name: string | Name, definition: object): new () => any;
 /**
  * @overload
- * @param    {string|Name}    name  Name for the constructor to have
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @returns  {class}          Defined constructor/class.
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(name: string | Name, parents: class[]): class;
+declare function TypeConstructor(name: string | Name, parents: (new () => any)[]): new () => any;
 /**
  * @overload
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(parents: class[], definition: object): class;
+declare function TypeConstructor(parents: (new () => any)[], definition: object): new () => any;
 /**
  * @overload
- * @param    {class[]}        parents Any parent types to extend/inherit.
- * @returns  {class}          Defined constructor/class.
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(parents: class[]): class;
+declare function TypeConstructor(parents: (new () => any)[]): new () => any;
 /**
  * @overload
- * @param    {object}         definition  Properties, methods, listeners, etc.
- * @returns  {class}          Defined constructor/class.
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
  */
-declare function TypeConstructor(definition: object): class;
+declare function TypeConstructor(definition: object): new () => any;
 /**
  * @overload
- * @returns  {class}          Generic Constructor/class.
+ * @returns  {new *}  Generic Constructor/class.
  */
-declare function TypeConstructor(): class;
+declare function TypeConstructor(): new () => any;
 import ClassDescriptor from "./descriptors/class.js";
