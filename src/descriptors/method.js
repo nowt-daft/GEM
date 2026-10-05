@@ -24,7 +24,13 @@ const REST = "...";
  */
 export default function Method(
 	name,
-	{ params = {}, method, returns = undefined }
+	{
+		description = "",
+		examples = "",
+		params = {},
+		method,
+		returns = undefined
+	}
 ) {
 	const fields = Fields.create(params);
 

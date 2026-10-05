@@ -1,4 +1,5 @@
 import is from "./utils/is.js";
+import tagify from "./utils/tagify.js";
 import { init, construct, map } from "./types/object.js";
 
 import Descriptor from "./descriptors/descriptor.js";
@@ -600,6 +601,97 @@ export const Interface = MetaType(
 		}
 	}
 );
+
+export class Void extends Abstract {
+	static defines(instance) {
+		return is.undefined(instance);
+	}
+}
+
+export class Any extends Abstract {
+	static defines() {
+		return true;
+	}
+}
+
+export const List = MetaType(
+	'<T>[]',
+	(
+		_,
+		{ parents: [{ name }] }
+	) => Constructor.Abstract(
+		`${ name }[]`
+	),
+	{
+		defines(instance) {
+			const { parents: [T] } = this;
+			return instance?.every?.(
+				item => item instanceof T
+			) ?? false;
+		}
+	}
+);
+
+export const Either = MetaType(
+	'T|U|...|V',
+	(
+		_,
+		{
+			parents
+		}
+	) => Constructor.Abstract(
+		`${
+			parents.map(
+				p => p.name
+			).join('|')
+		}`
+	),
+	{
+		defines(instance) {
+			const { parents } = this;
+			return parents?.some?.(
+				p => instance instanceof p
+			);
+		}
+	}
+);
+
+export const Tuple = MetaType(
+	`[...T]`,
+	(
+		_,
+		{ parents }
+	) => Constructor.Abstract(
+		`[${ parents.map(p => p.name).join(',') }]`
+	),
+	{
+		defines(instance) {
+			const { parents } = this;
+			return is.array(instance) &&
+				parents.length === instance.length &&
+					instance.every(
+						(v, i) => v instanceof p[i]
+					);
+		}
+	}
+);
+
+export const Options = (
+	...values
+) => {
+	const name = `[${ values.map(v => tagify(v)).join('|') }]`;
+	return {
+		[name]: class extends Abstract {
+			static defines(instance) {
+				return values.includes(instance);
+			}
+		}
+	}[name]
+};
+
+export const Scalar = MetaType();
+
+export const Vector = MetaType();
 
 bootstrap.forEach(
 	([type, statics = {}]) =>
