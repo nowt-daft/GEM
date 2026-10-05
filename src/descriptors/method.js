@@ -22,6 +22,7 @@ const REST = "...";
  * @param     {Record<string,new => *}  definition.params
  * @param     {Function}                definition.method
  * @param     {new => *}                definition.returns
+ * @param     {boolean}                 [ignore_return_check]
  * @returns   {Function}
  */
 export default function Method(
@@ -32,7 +33,8 @@ export default function Method(
 		params = {},
 		method,
 		returns = undefined
-	}
+	},
+	ignore_return_check = is.undefined(returns)
 ) {
 	const fields = Fields.create(params);
 
@@ -102,14 +104,19 @@ export default function Method(
 				this,
 				...args
 			);
-			if (!(rtrn instanceof returns))
-				throw new ReturnError(
-					_type,
-					name,
-					returns,
-					rtrn?.constructor
-				);
-			return rtrn;
+
+			if (
+				ignore_return_check ||
+				rtrn instanceof returns
+			)
+				return rtrn;
+
+			throw new ReturnError(
+				_type,
+				name,
+				returns,
+				rtrn?.constructor
+			);
 		},
 		Properties.fixed(
 			{

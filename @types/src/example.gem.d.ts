@@ -1,7 +1,7 @@
 /*
  * 💎 GEM -> /@types/src/example.gem.d.ts
  * 📜 UiExample::Component::HTMLElement
- * 💾 Generated on 10/5/2026@17:13:05 from /src/example.gem.js
+ * 💾 Generated on 10/6/2026@24:30:51 from /src/example.gem.js
  */
 
 import { Attr, Var, Component } from "./gui.js";
@@ -60,15 +60,29 @@ declare class UiExample extends HTMLElement  {
 	static validate(str: string): boolean;
 	/**
 	 * @method parse
+	 * @description 
+	 * Uses the given string to construct an instance of this type. By default, the constructor of the type is called.
 	 */
-	static parse(string): unknown;
+	static parse(str: string): object;
 	/**
 	 * @method stringify
+	 * @description 
+	 * Converts our instance into a string representation of itself.
 	 */
-	static stringify(instance): unknown;
+	static stringify(instance: object): string;
 	/**
 	 * @method serialise
+	 * @description 
+	 * Intermediary step from instance to string. This is needed for some types.
+	 * @example 
+	 * [TODO] Please provide a solid example...
 	 */
-	static serialise(instance): unknown;
+	static serialise(instance: object): object;
+	/**
+	 * @method defines
+	 * @description 
+	 * Is this type or one of its parents the constructor for the given instance.
+	 */
+	static defines(): boolean;
 }
 export default UiExample;

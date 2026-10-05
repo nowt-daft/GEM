@@ -8,7 +8,6 @@ import Properties from "./descriptors/properties.js";
 import Descriptor from "./descriptors/descriptor.js";
 import MetaDescriptor from "./descriptors/meta.js";
 
-// import Getter from "./descriptors/getter.js";
 export { default as Getter } from "./descriptors/getter.js";
 
 import { Field } from "./descriptors/field.js";
@@ -19,24 +18,28 @@ import ClassDescriptor from "./descriptors/class.js";
 
 import MetaTypeError from "./errors/metatype.js";
 import AbstractError from "./errors/abstract.js";
-
-
-import bootstrap from "./misc/bootstrap.js";
 import ArgumentError from "./errors/argument.js";
 
-const to_descriptors = (key, value) => [
-	key,
-	(
-		is.object_literal(value) &&
-		is.method(value.method) &&
-		is.class(value.returns)
-	) ? Property.fixed(Method(key, value), true) :
-		value instanceof MetaDescriptor ? value.init(key) :
-			is.class(value) ? Field.type(value).init(key) :
-				value instanceof Descriptor ? value :
-					Property.fixed(value, true)
+import bootstrap from "./misc/bootstrap.js";
 
-];
+const to_descriptors = (
+	key,
+	value,
+	ignore_return_check = false
+) => {
+	return [
+		key,
+		(
+			is.object_literal(value) &&
+			is.method(value.method)
+		) ? Property.fixed(Method(key, value, ignore_return_check), true) :
+			value?.constructor == MetaDescriptor ? value.init(key) :
+				is.class(value) ? Field.type(value).init(key) :
+					value?.constructor == Descriptor ? value :
+						Property.fixed(value, true)
+
+	]
+};
 
 /**
  * @mixin STATIC
@@ -98,9 +101,6 @@ export const STATIC = {
 		properties,
 		enumerable = false
 	) {
-		console.log('"'.repeat(60));
-		console.log(this);
-		console.log('"'.repeat(60));
 		return Object.defineProperties(
 			this,
 			Properties.fixed(
@@ -315,10 +315,14 @@ export function Gemify(
 	
 	return Object.defineProperties(
 		type,
-		Properties.fixed(
+		map(
 			STATIC,
-			false
+			(k, v) => to_descriptors(k, v, true)
 		)
+		// Properties.fixed(
+		// 	STATIC,
+		// 	false
+		// )
 	);
 }
 
@@ -716,6 +720,8 @@ export const Options = (
 	}[name]
 };
 
+// TODO: FINISH ANY NECESSARY METATYPE AND TYPES
+// GET FILES FROM LAPTOP...
 export const Scalar = MetaType();
 
 export const Vector = MetaType();

@@ -1,4 +1,4 @@
-import { view_prototype, view } from "../types/object.js";
+import { view_prototype } from "../types/object.js";
 import { diff } from "../io/path.js";
 import is from "../utils/is.js";
 

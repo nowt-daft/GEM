@@ -7,6 +7,7 @@
  * @param     {Record<string,new => *}  definition.params
  * @param     {Function}                definition.method
  * @param     {new => *}                definition.returns
+ * @param     {boolean}                 [ignore_return_check]
  * @returns   {Function}
  */
 export default function Method(name: string, { description, example, params, method, returns }: {
@@ -15,4 +16,4 @@ export default function Method(name: string, { description, example, params, met
     params: Record<string, new () => any>;
     method: Function;
     returns: new () => any;
-}): Function;
+}, ignore_return_check?: boolean | undefined): Function;

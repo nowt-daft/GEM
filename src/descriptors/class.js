@@ -36,6 +36,12 @@ import Fields from "./fields.js";
  * @typedef {import('./fields.js').Dictionary} Dictionary
  */
 
+/**
+ * TODO: MIGRATE PROPERTIES_DESCRIPTOR and PROTOTYPE to GEM file.
+ * perhaps.... it might JUST be PROTOTYPE that gets moved. It would
+ * certainly be easier...
+ */
+
 const AT = '@';
 const
 	PROPERTY = 0,
