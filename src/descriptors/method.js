@@ -17,6 +17,8 @@ const REST = "...";
  * @function  Method
  * @param     {string}                  name
  * @param     {object}                  definition
+ * @param     {string}                  definition.description
+ * @param     {string}                  definition.example
  * @param     {Record<string,new => *}  definition.params
  * @param     {Function}                definition.method
  * @param     {new => *}                definition.returns
@@ -26,7 +28,7 @@ export default function Method(
 	name,
 	{
 		description = "",
-		examples = "",
+		example = "",
 		params = {},
 		method,
 		returns = undefined
@@ -111,6 +113,8 @@ export default function Method(
 		},
 		Properties.fixed(
 			{
+				description,
+				example,
 				params: fields,
 				returns
 			},

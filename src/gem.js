@@ -2,14 +2,19 @@ import is from "./utils/is.js";
 import tagify from "./utils/tagify.js";
 import { init, construct, map } from "./types/object.js";
 
-import Descriptor from "./descriptors/descriptor.js";
-import MetaDescriptor from "./descriptors/meta.js";
 import Property from "./descriptors/property.js";
 import Properties from "./descriptors/properties.js";
+
+import Descriptor from "./descriptors/descriptor.js";
+import MetaDescriptor from "./descriptors/meta.js";
+
+// import Getter from "./descriptors/getter.js";
+export { default as Getter } from "./descriptors/getter.js";
+
 import { Field } from "./descriptors/field.js";
 export { default as Field } from "./descriptors/field.js";
-import Method from "./descriptors/method.js";
 
+import Method from "./descriptors/method.js";
 import ClassDescriptor from "./descriptors/class.js";
 
 import MetaTypeError from "./errors/metatype.js";
@@ -34,41 +39,54 @@ const to_descriptors = (key, value) => [
 ];
 
 /**
- * @mixin
+ * @mixin STATIC
  */
 export const STATIC = {
 	expression: /.*/i,
-	/**
-	 * @param    {string}  string
-	 * @returns  {boolean}
-	 */
-	validate(string) {
-		return this.expression.test(string);
-	},
-	/**
-	 * @param    {string}  string
-	 * @returns  {object}  Constructed instance of type based-on string
-	 */
-	parse(string) {
-		return new this(string);
-	},
-	/**
-	 * @param    {object}  instance
-	 * @returns  {string}  string representation of the instance
-	 */
-	stringify(instance) {
-		return `${ instance }`;
+
+	validate: {
+		description: "Validates if the given string can be parsed into this type.",
+		params: {
+			str: String
+		},
+		method(str) {
+			return this.expression.test(str)
+		},
+		returns: Boolean
 	},
 
-	/**
-	 * How do we serialise the instance into JSON? By default,
-	 * We leave it untouched.
-	 *
-	 * @param   {object}  instance
-	 * @returns {any}
-	 */
-	serialise(instance) {
-		return instance;
+	parse: {
+		description: "Uses the given string to construct an instance of this type. By default, the constructor of the type is called.",
+		params: {
+			str: String
+		},
+		method(str) {
+			return new this(str);
+		},
+		returns: Object
+	},
+
+	stringify: {
+		description: "Converts our instance into a string representation of itself.",
+		params: {
+			instance: Object,
+		},
+		method(instance) {
+			return `${ instance }`;
+		},
+		returns: String
+	},
+
+	serialise: {
+		description: "Intermediary step from instance to string. This is needed for some types.",
+		example: "[TODO] Please provide a solid example...",
+		params: {
+			instance: Object
+		},
+		method(instance) {
+			return instance;
+		},
+		returns: Object
 	},
 
 	/**
@@ -80,6 +98,9 @@ export const STATIC = {
 		properties,
 		enumerable = false
 	) {
+		console.log('"'.repeat(60));
+		console.log(this);
+		console.log('"'.repeat(60));
 		return Object.defineProperties(
 			this,
 			Properties.fixed(
@@ -89,13 +110,17 @@ export const STATIC = {
 		);
 	},
 
-	/**
-	 * @param    {any}     value
-	 * @returns  {boolean} Is the value an instance or descendent of this class?
-	 */
-	defines(value) {
-		return is.of_type(value, this);
+	defines: {
+		description: "Is this type or one of its parents the constructor for the given instance.",
+		params: {
+			// instance: Any,
+		},
+		method(instance) {
+			return is.of_type(instance, this);
+		},
+		returns: Boolean
 	},
+
 	/**
 	 * Metaprogramming -> hooks into "instanceof" keyword
 	 * @example
@@ -109,6 +134,8 @@ export const STATIC = {
 			this.defines(instance);
 	},
 
+	// TODO: We shall figure this one out.
+	// Probably just Get from accessor.js
 	// get list() {
 	// 	return List(this);
 	// }

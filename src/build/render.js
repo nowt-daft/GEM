@@ -9,7 +9,7 @@ import { GetDescriptor } from "../descriptors/getter.js";
 import ClassDescriptor from "../descriptors/class.js";
 import { MetaType } from "../gem.js";
 
-import tagify, { parse_args, parse_returns } from "../utils/tagify.js";
+import { parse_args, parse_returns } from "../utils/tagify.js";
 
 const TAB = '\t';
 const NEWLINE = '\n';
@@ -33,7 +33,7 @@ const STATIC_IGNORES = [
 	'prototype',
 	'listeners',
 	'static',
-	'defines',
+	// 'defines',
 	// 'expression'
 ];
 
@@ -213,19 +213,41 @@ export const render_methods =
 				key,
 				method
 			]) =>
-				`${ TAB }${ render_method(T, key, method) };`
+				`${ render_method(T, key, method) };`
 		).join(NEWLINE);
+
+/**
+ * @param    {string}  type
+ * @param    {string}  [message]
+ * @returns  {string}
+ */
+export const render_method_doc = (
+	type,
+	message
+) => {
+	if (!message)
+		return '';
+
+	return `${ TAB } * @${ type } ${ NEWLINE }` + (
+		message
+			.split(NEWLINE)
+			.map(line => `${ TAB } * ${ line }`)
+			.join(NEWLINE) + NEWLINE
+	) ?? '';
+}
 
 /**
  * @param    {ClassDescriptor}  T
  * @param    {string}  key
  * @param    {Function}  method
+ * @param    {boolean}  is_static
  * @returns  {string}  Rendered method with its params and return type
  */
 export const render_method = (
 	T,
 	key,
-	method
+	method,
+	is_static = false
 ) => {
 	let rtrns = "";
 
@@ -236,7 +258,19 @@ export const render_method = (
 		rtrns = T.name;
 	}
 
-	return `${
+	// TODO: helper method for the following:
+	const method_name = `${ TAB } * @method ${ key }` + NEWLINE;
+	const description = render_method_doc('description', method.description);
+	const example = render_method_doc('example', method.example);
+	const static_label = is_static ? 'static ' : '';
+
+	return `${ TAB }/**${ NEWLINE }${
+		method_name
+	}${
+		description
+	}${
+		example
+	}${ TAB } */${ NEWLINE }${ TAB }${ static_label }${
 		key
 	}${ GROUP_START }${
 		render_params(method)
@@ -283,7 +317,7 @@ export const render_statics = T => {
 				value
 			]) => {
 				if (is.method(value))
-					return `${ TAB }static ${ render_method(T, key, value) };`;
+					return `${ render_method(T, key, value, true) };`;
 
 				value = { ...Object.getOwnPropertyDescriptor(T, key), type: value.constructor };
 				return `${ TAB }static ${ render_field(key, value) };`;

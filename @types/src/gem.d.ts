@@ -25,46 +25,58 @@ export function Gemify<T>(type: T): T;
  * @returns {TypeConstructor}  Type Constuctor --> a CLASS that constructs TYPES.
  */
 export function MetaType(meta_name: string, constructor_format: ConstructorFormatter, statics?: object): typeof TypeConstructor;
+export { default as Getter } from "./descriptors/getter.js";
 export { default as Field } from "./descriptors/field.js";
 /**
- * @mixin
+ * @mixin STATIC
  */
 export const STATIC: {
     expression: RegExp;
-    /**
-     * @param    {string}  string
-     * @returns  {boolean}
-     */
-    validate(string: string): boolean;
-    /**
-     * @param    {string}  string
-     * @returns  {object}  Constructed instance of type based-on string
-     */
-    parse(string: string): object;
-    /**
-     * @param    {object}  instance
-     * @returns  {string}  string representation of the instance
-     */
-    stringify(instance: object): string;
-    /**
-     * How do we serialise the instance into JSON? By default,
-     * We leave it untouched.
-     *
-     * @param   {object}  instance
-     * @returns {any}
-     */
-    serialise(instance: object): any;
+    validate: {
+        description: string;
+        params: {
+            str: StringConstructor;
+        };
+        method(str: any): any;
+        returns: BooleanConstructor;
+    };
+    parse: {
+        description: string;
+        params: {
+            str: StringConstructor;
+        };
+        method(str: any): any;
+        returns: ObjectConstructor;
+    };
+    stringify: {
+        description: string;
+        params: {
+            instance: ObjectConstructor;
+        };
+        method(instance: any): string;
+        returns: StringConstructor;
+    };
+    serialise: {
+        description: string;
+        example: string;
+        params: {
+            instance: ObjectConstructor;
+        };
+        method(instance: any): any;
+        returns: ObjectConstructor;
+    };
     /**
      * @param   {object}   properties
      * @param   {boolean}  enumerable
      * @returns {object}   this
      */
     static(properties: object, enumerable?: boolean): object;
-    /**
-     * @param    {any}     value
-     * @returns  {boolean} Is the value an instance or descendent of this class?
-     */
-    defines(value: any): boolean;
+    defines: {
+        description: string;
+        params: {};
+        method(instance: any): boolean;
+        returns: BooleanConstructor;
+    };
     /**
      * Metaprogramming -> hooks into "instanceof" keyword
      * @example
@@ -195,6 +207,331 @@ export const Source: typeof TypeConstructor;
  * @type {TypeConstructor}
  */
 export const Interface: typeof TypeConstructor;
+export class Void {
+    static defines(instance: any): boolean;
+}
+export class Any {
+    static defines(): boolean;
+}
+/**
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
+ *
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
+ *
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(name: string | Name, definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(name: string | Name, parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function List(definition: object): new () => any;
+/**
+ * @overload
+ * @returns  {new *}  Generic Constructor/class.
+ */
+export function List(): new () => any;
+/**
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
+ *
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
+ *
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(name: string | Name, definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(name: string | Name, parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Either(definition: object): new () => any;
+/**
+ * @overload
+ * @returns  {new *}  Generic Constructor/class.
+ */
+export function Either(): new () => any;
+/**
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
+ *
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
+ *
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(name: string | Name, definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(name: string | Name, parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Tuple(definition: object): new () => any;
+/**
+ * @overload
+ * @returns  {new *}  Generic Constructor/class.
+ */
+export function Tuple(): new () => any;
+export function Options(...values: any[]): {
+    new (): {};
+    defines(instance: any): boolean;
+};
+/**
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
+ *
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
+ *
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(name: string | Name, definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(name: string | Name, parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Scalar(definition: object): new () => any;
+/**
+ * @overload
+ * @returns  {new *}  Generic Constructor/class.
+ */
+export function Scalar(): new () => any;
+/**
+ * A Type Factory helps us define Types ad generate them.  This
+ * means we can call this as a function and it will return a
+ * kind of CONSTRUCTOR (be it a class or otherwise).
+ * It can also be extended directly by a class OR called with the
+ * NEW keyword to skip the creation of the specific type and straight
+ * to the desired instance of the Type.
+ *
+ * If name is absent, there must be:
+ *     at least TWO parents; OR
+ *     at least ONE parent and ONE definition; OR
+ *     ONE definition.
+ * If parents are absent, there must be:
+ *     ONE definition.
+ *     name is optional.
+ * If definition is absent, there must be:
+ *     at least TWO parents.
+ *
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(name: string | Name, parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {object}       definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(name: string | Name, definition: object): new () => any;
+/**
+ * @overload
+ * @param    {string|Name}  name  Name for the constructor to have
+ * @param    {(new *)[]}    parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(name: string | Name, parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @param    {object}     definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(parents: (new () => any)[], definition: object): new () => any;
+/**
+ * @overload
+ * @param    {(new *)[]}  parents Any parent types to extend/inherit.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(parents: (new () => any)[]): new () => any;
+/**
+ * @overload
+ * @param    {object}  definition  Properties, methods, listeners, etc.
+ * @returns  {new *}  Defined constructor/class.
+ */
+export function Vector(definition: object): new () => any;
+/**
+ * @overload
+ * @returns  {new *}  Generic Constructor/class.
+ */
+export function Vector(): new () => any;
 export type ConstructorFormatter = (name: string, descriptor: ClassDescriptor) => new () => any;
 export type Name = (descriptor: ClassDescriptor) => string;
 /**
