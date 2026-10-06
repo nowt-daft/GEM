@@ -134,16 +134,25 @@ const render_imports = source =>
 export const render_type = T => {
 	const {
 		name,
+		parents = [],
 		prescriptor = {},
 		__proto__ = Object.__proto__
 	} = T;
 
+	let class_name = ` * @class ${ name }`;
+	let mixes = parents.filter(p => p != __proto__).map(({ name }) => ` * @mixes ${ name }`).join(NEWLINE);
 	let declaration = `declare class ${ name }`;
 
-	if (__proto__ !== Object.__proto__)
+	if (__proto__ !== Object.__proto__) {
+		class_name += `\n * @extends ${ __proto__.name }`;
 		declaration += ` extends ${ __proto__.name } `;
+	}
 
-	return `${
+	return `/**${ NEWLINE }${
+		class_name
+	}${ NEWLINE }${
+		mixes
+	}${ mixes ? NEWLINE : '' } */${ NEWLINE }${
 		declaration
 	} ${ BLOCK_START }${ NEWLINE }${
 		render_fields(prescriptor)
@@ -221,17 +230,18 @@ export const render_methods =
  * @param    {string}  [message]
  * @returns  {string}
  */
-export const render_method_doc = (
+export const render_doc = (
 	type,
-	message
+	message,
+	tab = TAB
 ) => {
 	if (!message)
 		return '';
 
-	return `${ TAB } * @${ type } ${ NEWLINE }` + (
+	return `${ tab } * @${ type } ${ NEWLINE }` + (
 		message
 			.split(NEWLINE)
-			.map(line => `${ TAB } * ${ line }`)
+			.map(line => `${ tab } * ${ line }`)
 			.join(NEWLINE) + NEWLINE
 	) ?? '';
 }
@@ -260,8 +270,8 @@ export const render_method = (
 
 	// TODO: helper method for the following:
 	const method_name = `${ TAB } * @method ${ key }` + NEWLINE;
-	const description = render_method_doc('description', method.description);
-	const example = render_method_doc('example', method.example);
+	const description = render_doc('description', method.description);
+	const example = render_doc('example', method.example);
 	const static_label = is_static ? 'static ' : '';
 
 	return `${ TAB }/**${ NEWLINE }${

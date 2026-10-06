@@ -1,11 +1,15 @@
 /*
  * 💎 GEM -> /@types/src/example.gem.d.ts
  * 📜 UiExample::Component::HTMLElement
- * 💾 Generated on 10/6/2026@24:30:51 from /src/example.gem.js
+ * 💾 Generated on 10/6/2026@16:34:06 from /src/example.gem.js
  */
 
 import { Attr, Var, Component } from "./gui.js";
 
+/**
+ * @class UiExample
+ * @extends HTMLElement
+*/
 declare class UiExample extends HTMLElement  {
 	private get src(): String;
 	private get loaded(): Boolean;

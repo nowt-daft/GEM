@@ -5,7 +5,7 @@ export function render_type(T: ClassDescriptor): string;
 export function render_fields(prescriptor: Record<string, MetaDescriptor<any>>): string;
 export function render_field(key: string, field: MetaDescriptor<any>): string;
 export function render_methods(T: ClassDescriptor): string;
-export function render_method_doc(type: string, message?: string | undefined): string;
+export function render_doc(type: string, message?: string | undefined, tab?: string): string;
 export function render_method(T: ClassDescriptor, key: string, method: Function, is_static?: boolean): string;
 export function render_params(method: Function): string;
 export function render_type_name(type_name: string): string;
