@@ -115,6 +115,27 @@ export const render_notice = (
 `
 
 /**
+ * @param    {string}  type
+ * @param    {string}  [message]
+ * @returns  {string}
+ */
+export const render_doc = (
+	type,
+	message,
+	tab = TAB
+) => {
+	if (!message)
+		return '';
+
+	return `${ tab } * @${ type } ${ NEWLINE }` + (
+		message
+			.split(NEWLINE)
+			.map(line => `${ tab } * ${ line }`)
+			.join(NEWLINE) + NEWLINE
+	) ?? '';
+}
+
+/**
  * @param    {string}  source  JS source code from file
  * @returns  {string}  All lines starting with the import tag
  */
@@ -225,27 +246,6 @@ export const render_methods =
 		).join(NEWLINE);
 
 /**
- * @param    {string}  type
- * @param    {string}  [message]
- * @returns  {string}
- */
-export const render_doc = (
-	type,
-	message,
-	tab = TAB
-) => {
-	if (!message)
-		return '';
-
-	return `${ tab } * @${ type } ${ NEWLINE }` + (
-		message
-			.split(NEWLINE)
-			.map(line => `${ tab } * ${ line }`)
-			.join(NEWLINE) + NEWLINE
-	) ?? '';
-}
-
-/**
  * @param    {ClassDescriptor}  T
  * @param    {string}  key
  * @param    {Function}  method
@@ -280,7 +280,16 @@ export const render_method = (
 	}${ TAB } */${ NEWLINE }${ TAB }${ static_label }${
 		key
 	}${ GROUP_START }${
-		render_params(method)
+		key === 'super' ?
+			`...arg_collection: [${
+				T.parents?.filter(
+					p => p !== T.__proto__
+				)
+				.map(
+					p => `[${ p.prototype.init ? render_params(p.prototype.init) : '{}' }]`
+				) ?? ''
+			}]` : 
+			render_params(method)
 	}${ GROUP_END }: ${ render_type_name(rtrns) }`;
 }
 

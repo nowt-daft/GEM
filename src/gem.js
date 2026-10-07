@@ -186,7 +186,7 @@ export const PROTOTYPE = {
 		...arg_collection
 	) {
 		const type = this.constructor;
-		const parents = type.parents ?? [];
+		const parents = type.parents?.filter(p => p !== type.__proto__) ?? [];
 
 		if (arg_collection.length !== parents.length)
 			throw new MultiInheritError(type, parents, arg_collection);

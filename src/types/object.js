@@ -248,12 +248,14 @@ export const view = Object.view =
 	}
 
 /**
+ * @template T
+ *
  * Retrieve object of ALL methods defined or inherited on type.
  *
  * This function is recursive.  Please DO NOT pass in a second argument
  * as it is used to manage the state of the operation.
  *
- * @param    {class}  type
+ * @param    {new T}  type
  * @returns  {Record<Key,Function>}  Dictionary of methods
  */
 export const view_prototype = Object.view_prototype =
@@ -279,7 +281,7 @@ export const view_prototype = Object.view_prototype =
  * If the prototype DOES NOT have an init method, we assume each argument in
  * ...args is an Object of Key-Value pairs to assign to the target object.
  *
- * @template {class}   T
+ * @template T
  * @param    {object}  target
  * @param    {new T}   type  The type from which the target initialises.
  * @param    {...any}  args  Any arguments or Key-Value objects to assign.
@@ -314,7 +316,7 @@ export const init = Object.init =
  *
  * Pass a second argument (type) to verify a raw object against that type.
  *
- * @template {class}  T
+ * @template T
  * @param    {object} target  Instance to validate
  * @param    {new T}  [type=target.constructor]  Type/class/constructable
  * @returns  {object} Target object if all tests pass.

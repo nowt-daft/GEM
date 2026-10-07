@@ -2,9 +2,9 @@
   "include": ["index.js", "src/**/*"],
   "exclude": ["gem-lsp"],
   "compilerOptions": {
-    "plugins": [{
-        "name": "gem-lsp"
-    }],
+    // "plugins": [{
+    //     "name": "gem-lsp"
+    // }],
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
