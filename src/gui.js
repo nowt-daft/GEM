@@ -53,6 +53,11 @@ const RESIZE_LISTENER =
 	);
 
 /**
+ * @callback HTMLListener
+ * @param    {Event}
+ */
+
+/**
  * Create/spawn a new HTML element with the given attributes and dataset.
  * First argument is of the format: "html-tag#id.class.class..." where the
  * id and classes are optional. However, the id must come before the classes.
@@ -111,136 +116,143 @@ const HTMLProperties = Fields.to_descriptors({
 					target.dispatch(new ResizeEvent(bounds))
 			)
 });
-const HTMLPrototype = {
-	attr: {
-		params: {
-			"key*": String,
-			"value?": String
-		},
-		method(
-			key,
-			value
-		) {
-			return value === "" ?
-				this.getAttribute(key) :
-				this.setAttribute(key, value) ?? value;
-		},
-		returns: String
-	},
 
-	var: {
-		params: {
-			"name": String,
-			"value?": String
+/**
+ * @param   {new HTMLElement}  T
+ * @returns Record<string,object>
+ */
+const HTMLPrototype = (T = HTMLElement) => {
+	return {
+		attr: {
+			params: {
+				"key*": String,
+				"value?": String
+			},
+			method(
+				key,
+				value
+			) {
+				return value === "" ?
+					this.getAttribute(key) :
+					this.setAttribute(key, value) ?? value;
+			},
+			returns: String
 		},
-		method(
-			name,
-			value
-		) {
-			const key = `--${ name }`;
-			return value === "" ?
-				this.styles.getPropertyValue(key) :
-				this.style.setProperty(key, value) ?? value;
-		},
-		returns: String
-	},
 
-	attach: {
-		params: {
-			"...elements": List(HTMLElement)
+		var: {
+			params: {
+				"name": String,
+				"value?": String
+			},
+			method(
+				name,
+				value
+			) {
+				const key = `--${ name }`;
+				return value === "" ?
+					this.styles.getPropertyValue(key) :
+					this.style.setProperty(key, value) ?? value;
+			},
+			returns: String
 		},
-		method(
-			...elements
-		) {
-			this.append(...elements);
-			return this;
-		},
-		returns: HTMLElement
-	},
 
-	detach: {
-		params: {
-			"...elements": List(HTMLElement)
+		attach: {
+			params: {
+				"...elements": List(HTMLElement)
+			},
+			method(
+				...elements
+			) {
+				this.append(...elements);
+				return this;
+			},
+			returns: T
 		},
-		method(
-			...elements
-		) {
-			for (const element of elements)
-				this.removeChild(element);
-			return this;
-		},
-		returns: HTMLElement
-	},
 
-	listen: {
-		params: {
-			channel: String,
-			listener: Function, // TODO: WE NEED A Callback TYPE.
-			"captures?": false
+		detach: {
+			params: {
+				"...elements": List(HTMLElement)
+			},
+			method(
+				...elements
+			) {
+				for (const element of elements)
+					this.removeChild(element);
+				return this;
+			},
+			returns: T
 		},
-		method(
-			channel,
-			listener,
-			captures = false
-		) {
-			if (channel === RESIZE)
-				RESIZE_LISTENER.observe(this);
-			
-			this.addEventListener(
+
+		listen: {
+			params: {
+				channel: String,
+				listener: Function, // TODO: WE NEED A Callback TYPE.
+				"captures?": false
+			},
+			method(
 				channel,
 				listener,
-				captures
-			);
+				captures = false
+			) {
+				if (channel === RESIZE)
+					RESIZE_LISTENER.observe(this);
+				
+				this.addEventListener(
+					channel,
+					listener,
+					captures
+				);
 
-			return this;
+				return this;
+			},
+			returns: T
 		},
-		returns: HTMLElement
-	},
 
-	unlisten: {
-		params: {
-			channel: String,
-			listener: Function, // TODO: Use Callback type
-			"captures?": false
-		},
-		method(
-			channel,
-			listener,
-			captures = false
-		) {
-			if (channel === RESIZE)
-				RESIZE_LISTENER.unobserve(this);
-
-			this.removeEventListener(
+		unlisten: {
+			params: {
+				channel: String,
+				listener: Function, // TODO: Use Callback type
+				"captures?": false
+			},
+			method(
 				channel,
 				listener,
-				captures
-			);
+				captures = false
+			) {
+				if (channel === RESIZE)
+					RESIZE_LISTENER.unobserve(this);
 
-			return this;
-		},
-		returns: HTMLElement
-	},
+				this.removeEventListener(
+					channel,
+					listener,
+					captures
+				);
 
-	dispatch: {
-		params: {
-			event: Any, // TODO: This should be Either(String, Object)
-			"data?": Object
+				return this;
+			},
+			returns: T
 		},
-		method(
-			event,
-			data = {}
-		) {
-			this.dispatchEvent(
-				is.string(event) ?
-					new GenericEvent(event, data) :
-					event
-			);
-			return this;
-		},
-		returns: HTMLElement
+
+		dispatch: {
+			params: {
+				event: Any, // TODO: This should be Either(String, Object)
+				"data?": Object
+			},
+			method(
+				event,
+				data = {}
+			) {
+				this.dispatchEvent(
+					is.string(event) ?
+						new GenericEvent(event, data) :
+						event
+				);
+				return this;
+			},
+			returns: T
+		}
 	}
-};
+}
 
 /**
  * @deprecated
@@ -254,12 +266,6 @@ const HTMLPrototype = {
 // 		...HTMLPrototype
 // 	}
 // );
-
-
-/**
- * @callback HTMLListener
- * @param    {Event}
- */
 
 /**
  * @class HTMLComponent
@@ -324,8 +330,8 @@ Object.defineProperties(
 	concat(
 		HTMLProperties,
 		Properties.fixed(
-			HTMLPrototype,
-			// false
+			HTMLPrototype(HTMLElement),
+			false
 		)
 	)
 );
@@ -345,11 +351,6 @@ export const Component = MetaType(
 	(
 		tag,
 		{
-			// Right, so this part is wrong...
-			// Because we should have more than
-			// ONE parent anyway.
-			// THEN, We need to make sure we are
-			// appending PROTOYPE and PROPERTIES properly.
 			parents: [parent],
 			prescriptor,
 			properties,
@@ -357,12 +358,11 @@ export const Component = MetaType(
 			listeners
 		}
 	) => {
-		tag = tag.toLowerCase();
-
-		const names = tag.split(TAG_DELIM);
+		const names = (tag = tag.toLowerCase()).split(TAG_DELIM);
 		
 		if (names.length === 1)
 			throw new ComponentDefinitionError(tag);
+
 
 		const class_name = names.map(
 			str => capitalise(str)
@@ -387,15 +387,10 @@ export const Component = MetaType(
 
 		Object.assign(
 			properties,
-			HTMLProperties // <-- THIS MIGHT NEED TO CHANGE...
+			HTMLProperties
 		);
 
-		Object.assign(
-			prototype,
-			HTMLPrototype
-		);
-
-		return {
+		const T = {
 			[class_name]: class extends (
 				// TODO:
 				// It might, in fact, ALWAYS be HTMLElement, and
@@ -475,5 +470,12 @@ export const Component = MetaType(
 				}
 			}
 		}[class_name];
+
+		Object.assign(
+			prototype,
+			HTMLPrototype(T)
+		);
+
+		return T;
 	}
 );

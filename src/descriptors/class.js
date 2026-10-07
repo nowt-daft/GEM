@@ -8,9 +8,6 @@ import {
 } from "../types/object.js";
 import is from "../utils/is.js";
 
-import InheritError from "../errors/inherit.js";
-import MultiInheritError from "../errors/multi_inherit.js";
-
 import Accessor from "./accessor.js";
 import Fields from "./fields.js";
 
@@ -69,63 +66,6 @@ const PROPERTIES_DESCRIPTOR = {
 		),
 };
 
-/**
- * @template T
- * @mixin
- */
-export const PROTOTYPE = {
-	/**
-	 * Method for inheriting from some specific parent by passing this
-	 * instance and any arguments to the parent's init method.
-	 *
-	 * @param    {new T}       parent
-	 * @param    {...*}        args
-	 * @returns  {typeof this} this
-	 *
-	 * @throws   {InheritError}
-	 */
-	inherit(
-		parent,
-		...args
-	) {
-		if (!this.constructor.parents?.includes(parent))
-			throw new InheritError(this.constructor, parent);
-
-		return init(
-			this,
-			parent,
-			...args
-		);
-	},
-	/**
-	 * Inherit from all parents at once by passing an Array of arguments
-	 * which corresponds to each parent of the type, in order.
-	 *
-	 * @param    {...any[]}    arg_collection
-	 * @returns  {typeof this} this
-	 *
-	 * @throws   {MultiInheritError}
-	 */
-	super(
-		...arg_collection
-	) {
-		const type = this.constructor;
-		const parents = type.parents ?? [];
-
-		if (arg_collection.length !== parents.length)
-			throw new MultiInheritError(type, parents, arg_collection);
-
-		return parents.reduce(
-			(target, parent, index) => init(
-				target,
-				parent,
-				...arg_collection[index]
-			),
-			this
-		);
-	}
-};
-
 export default class ClassDescriptor {
 	/** @type {Parents} */
 	parents = [];
@@ -176,7 +116,7 @@ export default class ClassDescriptor {
 			Fields.to_descriptors(fields)
 		);
 		prototype = concat(
-			PROTOTYPE,
+			// PROTOTYPE,
 			...parents.map(
 				p => (
 					p == globalThis.HTMLElement || p == globalThis.Element

@@ -20,6 +20,9 @@ import MetaTypeError from "./errors/metatype.js";
 import AbstractError from "./errors/abstract.js";
 import ArgumentError from "./errors/argument.js";
 
+import InheritError from "./errors/inherit.js";
+import MultiInheritError from "./errors/multi_inherit.js";
+
 import bootstrap from "./misc/bootstrap.js";
 
 const to_descriptors = (
@@ -59,7 +62,7 @@ export const STATIC = {
 	},
 
 	parse: {
-		description: "Uses the given string to construct an instance of this type. By default, the constructor of the type is called.",
+		description: "Uses the given string to construct an instance of this type. By default, the constructor of this type is called.",
 		params: {
 			str: String
 		},
@@ -81,8 +84,8 @@ export const STATIC = {
 	},
 
 	serialise: {
-		description: "Intermediary step from instance to string. This is needed for some types.",
-		example: "[TODO] Please provide a solid example...",
+		description: "Intermediary step from instance to string. This is needed for some types (ie. Date, Set, etc)",
+		// example: "[TODO]",
 		params: {
 			instance: Object
 		},
@@ -92,29 +95,30 @@ export const STATIC = {
 		returns: Object
 	},
 
-	/**
-	 * @param   {object}   properties
-	 * @param   {boolean}  enumerable
-	 * @returns {object}   this
-	 */
-	static(
-		properties,
-		enumerable = false
-	) {
-		return Object.defineProperties(
-			this,
-			Properties.fixed(
-				properties,
-				enumerable
-			)
-		);
+	static: {
+		description: "Create fixed values to exist on the constructor.",
+		params: {
+			// properties: Object,
+			// "enumerable?": false
+		},
+		method(
+			properties,
+			enumerable = false
+		) {
+			return Object.defineProperties(
+				this,
+				Properties.fixed(
+					properties,
+					enumerable
+				)
+			);
+		},
+		returns: Object
 	},
 
 	defines: {
 		description: "Is this type or one of its parents the constructor for the given instance.",
-		params: {
-			// instance: Any,
-		},
+		params: {/* instance: Object */},
 		method(instance) {
 			return is.of_type(instance, this);
 		},
@@ -140,6 +144,63 @@ export const STATIC = {
 	// 	return List(this);
 	// }
 }
+
+/**
+ * @template T
+ * @mixin PROTOTYPE
+ */
+export const PROTOTYPE = {
+	/**
+	 * Method for inheriting from some specific parent by passing this
+	 * instance and any arguments to the parent's init method.
+	 *
+	 * @param    {new T}       parent
+	 * @param    {...*}        args
+	 * @returns  {typeof this} this
+	 *
+	 * @throws   {InheritError}
+	 */
+	inherit(
+		parent,
+		...args
+	) {
+		if (!this.constructor.parents?.includes(parent))
+			throw new InheritError(this.constructor, parent);
+
+		return init(
+			this,
+			parent,
+			...args
+		);
+	},
+	/**
+	 * Inherit from all parents at once by passing an Array of arguments
+	 * which corresponds to each parent of the type, in order.
+	 *
+	 * @param    {...any[]}    arg_collection
+	 * @returns  {typeof this} this
+	 *
+	 * @throws   {MultiInheritError}
+	 */
+	super(
+		...arg_collection
+	) {
+		const type = this.constructor;
+		const parents = type.parents ?? [];
+
+		if (arg_collection.length !== parents.length)
+			throw new MultiInheritError(type, parents, arg_collection);
+
+		return parents.reduce(
+			(target, parent, index) => init(
+				target,
+				parent,
+				...arg_collection[index]
+			),
+			this
+		);
+	}
+};
 
 /**
  * @callback ConstructorFormatter
@@ -319,10 +380,6 @@ export function Gemify(
 			STATIC,
 			(k, v) => to_descriptors(k, v, true)
 		)
-		// Properties.fixed(
-		// 	STATIC,
-		// 	false
-		// )
 	);
 }
 
@@ -416,8 +473,6 @@ export function MetaType(
 					}
 				);
 
-			// TODO: REVISIT -- WHAT DID THIS SOLVE FOR US *EXACTLY*?
-			// EXCEPT FOR THE STATICS, OF COURSE...
 			Object.defineProperties(
 				constructor,
 				{
@@ -461,20 +516,13 @@ export function MetaType(
 
 			Object.defineProperties(
 				constructor.prototype,
-				// Properties.fixed(
-					map(
-						prototype,
-						to_descriptors
-						// (key, method) => [
-						// 	key,
-						// 	is.object_literal(method) ?
-						// 		Method(key, method) :
-						// 		method
-						// ]
-					),
-					// prototype,
-					// false
-				// )
+				map(
+					{
+						...PROTOTYPE,
+						...prototype
+					},
+					to_descriptors
+				),
 			);
 
 			return is.global(this) ?

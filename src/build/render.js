@@ -9,7 +9,7 @@ import { GetDescriptor } from "../descriptors/getter.js";
 import ClassDescriptor from "../descriptors/class.js";
 import { MetaType } from "../gem.js";
 
-import { parse_args, parse_returns } from "../utils/tagify.js";
+import tagify, { parse_args, parse_returns } from "../utils/tagify.js";
 
 const TAB = '\t';
 const NEWLINE = '\n';
@@ -26,16 +26,15 @@ const HTML_CALLBACKS = [
 const STATIC_IGNORES = [
 	'name',
 	'length',
-	'defaults',
-	'parents',
-	'prescriptor',
-	'properties',
-	'prototype',
-	'listeners',
+	'constructor',
 	'static',
-	// 'defines',
-	// 'expression'
+	'defines',
 ];
+const METHOD_OVERRIDES = [
+	'constructor',
+	'inherit',
+	'super'
+]
 
 const TYPE_CONVERSIONS = {
 	Boolean: "boolean",
@@ -189,12 +188,12 @@ export const render_field = (
 	key,
 	field
 ) => {
-	const { type, is_private, is_nullable, writable, enumerable, get } = field;
+	const { type, is_private, is_nullable, writable = true, enumerable = true, get, set } = field;
 
 	const prefix = is_private || !enumerable ? 'private ' : '';
 	const getter =
 		field instanceof GetDescriptor ||
-			field instanceof Get || get;
+			field instanceof Get || (get && !set);
 	const readonly = field instanceof FixedProperty || !writable;
 	const label =
 		(readonly || getter) ?
@@ -259,16 +258,14 @@ export const render_method = (
 	method,
 	is_static = false
 ) => {
-	let rtrns = "";
-
-	if (key !== 'init')
-		rtrns = method?.returns?.name ?? parse_returns(method);
-	else {
+	if (key == 'init')
 		key = 'constructor';
-		rtrns = T.name;
-	}
 
-	// TODO: helper method for the following:
+	const rtrns =
+		METHOD_OVERRIDES.includes(key) ?
+			T.name :
+			(method?.returns?.name ?? parse_returns(method));
+
 	const method_name = `${ TAB } * @method ${ key }` + NEWLINE;
 	const description = render_doc('description', method.description);
 	const example = render_doc('example', method.example);
@@ -329,8 +326,19 @@ export const render_statics = T => {
 				if (is.method(value))
 					return `${ render_method(T, key, value, true) };`;
 
-				value = { ...Object.getOwnPropertyDescriptor(T, key), type: value.constructor };
-				return `${ TAB }static ${ render_field(key, value) };`;
+				const field = {
+					...Object.getOwnPropertyDescriptor(T, key),
+					type: value.constructor
+				};
+				return (
+					`${
+						TAB
+					}static ${
+						render_field(key, field)
+					// } = ${
+					// 	tagify(value)
+					};`
+				);
 			}
 	).join(NEWLINE);
 }

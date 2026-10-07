@@ -12,7 +12,7 @@
  * @param    {T}  type
  * @returns  {T}  Modified class "type"
  */
-export function Gemify<T>(type: T): T;
+export function Gemify<T_1>(type: T_1): T_1;
 /**
  * A factory for producing Meta-Types/Super-Classes (types of types)
  *
@@ -58,19 +58,23 @@ export const STATIC: {
     };
     serialise: {
         description: string;
-        example: string;
         params: {
             instance: ObjectConstructor;
         };
         method(instance: any): any;
         returns: ObjectConstructor;
     };
-    /**
-     * @param   {object}   properties
-     * @param   {boolean}  enumerable
-     * @returns {object}   this
-     */
-    static(properties: object, enumerable?: boolean): object;
+    static: {
+        description: string;
+        params: {};
+        method(properties: any, enumerable?: boolean): {
+            description: string;
+            params: {};
+            method(properties: any, enumerable?: boolean): any;
+            returns: ObjectConstructor;
+        };
+        returns: ObjectConstructor;
+    };
     defines: {
         description: string;
         params: {};
@@ -86,6 +90,30 @@ export const STATIC: {
      */
     [Symbol.hasInstance](instance: any): boolean;
 };
+export namespace PROTOTYPE {
+    /**
+     * Method for inheriting from some specific parent by passing this
+     * instance and any arguments to the parent's init method.
+     *
+     * @param    {new T}       parent
+     * @param    {...*}        args
+     * @returns  {typeof this} this
+     *
+     * @throws   {InheritError}
+     */
+    export function inherit(parent: new () => T, ...args: any[]): typeof this;
+    /**
+     * Inherit from all parents at once by passing an Array of arguments
+     * which corresponds to each parent of the type, in order.
+     *
+     * @param    {...any[]}    arg_collection
+     * @returns  {typeof this} this
+     *
+     * @throws   {MultiInheritError}
+     */
+    function _super(...arg_collection: any[][]): typeof this;
+    export { _super as super };
+}
 export class Constructor {
     /**
      * @param    {string}  name  Name for the object constructor.

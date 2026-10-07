@@ -101,15 +101,19 @@ const TAGGERS = {
 					TAGGERS.boolean(x.valueOf()) :
 				x instanceof Number ?
 					TAGGERS.number(x) :
-					x.constructor.name + SPACE +
 					(
 						x instanceof Array ?
-							`[${ x.length }]` :
+							`[${ x.map(_ => tagify(_)).join(',') }]` :
 						x instanceof Set ?
-							`[${ x.size }]` :
+							`Set(${ tagify([...x]) })` :
 						x instanceof Map ?
-							`{${ x.size }}` :
-							'{}'
+							`Map(${ tagify(x.entries()) })` :
+							`{${
+								Object
+									.entries(x)
+									.map(([k, v]) => `"${ k }":${ tagify(v) }`)
+									.join(',')
+							}}`
 					)
 			),
 };
@@ -118,7 +122,7 @@ const TAGGERS = {
  * @param    {any}     value
  * @returns  {string}  Representation of the value based on its type.
  */
-export const tagify = value => TAGGERS?.[typeof value](value) ?? 'unknown';
+export const tagify = value => TAGGERS?.[typeof value](value) ?? 'undefined';
 
 /**
  * This is a string template function.
