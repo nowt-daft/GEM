@@ -3,8 +3,7 @@ import UiExample from "./example.gem";
 const ex = new UiExample;
 
 /**
- * So, this IS working.  Let's spend another hour or two trying to optimise.
- * It's lookin' good though. Next, I want to start USING this to create my
+ * I want to start USING this to create my
  * website. We can start with things that are STATIC... However, creating a
  * container and server environment is a good idea... I have SO MUCH of the
  * code. It's, honestly, time to amalgamate.

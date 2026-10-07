@@ -1,7 +1,11 @@
-import { Attr, Var, Component } from "./gui.js";
+import { Attr, Component } from "./gui.js";
+import UiSlideshow from "./slideshow.gem.js";
 
 export default Component(
 	"ui-example",
+	[
+		UiSlideshow
+	],
 	{
 		src: Attr(String, ({ target, to }) => target.load(to)),
 		_loaded: false,

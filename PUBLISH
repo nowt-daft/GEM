@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # node_modules/typescript/bin/tsc -p tsconfig.json
+rm -rf $PWD/@types/
 bun \
 	run \
 	--no-telemetry \
