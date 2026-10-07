@@ -51,9 +51,6 @@ export default (
 			)
 		),
 		() => void 0
-		// d => console.info(
-			// ts.formatDiagnostic(d, WATCH_INFO_FORMAT)
-		// )
 	);
 	
 	host.writeFile = (

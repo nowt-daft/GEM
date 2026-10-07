@@ -548,7 +548,13 @@ export function MetaType(
  * inherit multiple parents via *composition*.
  *
  * @example
- * class C extends Compose(A, B) {
+ * class C extends Compose(
+ *     [A, B],
+ *     {
+ *         key: String,
+ *         prop: Boolean,
+ *     }
+ * ) {
  *     constructor() {
  *         super(
  *             ["args", "for", "class", "A"],
@@ -560,8 +566,8 @@ export function MetaType(
  * @type {TypeConstructor}
  */
 export const Compose = MetaType(
-	"Composition",
-	name => Constructor.Class(name)
+	"Compose",
+	(_, { parents }) => Constructor.Class(`Compose<${ parents.map(({ name }) => name).join(',') }>`)
 );
 
 /**
@@ -594,9 +600,12 @@ export const Abstract = MetaType(
  * object instance.
  *
  * @example
- * const Student = Model(
- *     Person,
- *     Customer,
+ * const Stud = Model(
+ *     "Student",
+ *     [
+ *         Person,
+ *         Customer,
+ *     ],
  *     {
  *         date_enrolled: Date,
  *         classes: Array,
@@ -604,7 +613,7 @@ export const Abstract = MetaType(
  *     }
  * );
  *
- * const student = Student({
+ * const stud = Stud({
  *     name: "John Doe",
  *     customer_id: "x7B42AB00C8",
  *     date_enrolled: "2019-09-14", // <- will be parsed by Date
@@ -623,8 +632,10 @@ export const Model = MetaType(
  *
  * @example
  * class C extends Source(
- *     SuperClassA, // <-- inherits DIRECTLY from this class
- *     SuperClassB, // <-- others types to extend.
+ *     [
+ *         SuperClassA, // <-- inherits DIRECTLY from this class
+ *         SuperClassB // <-- others types to extend.
+ *     ],
  *     {
  *         property: 42,
  *         value: Boolean
@@ -640,10 +651,10 @@ export const Model = MetaType(
  */
 export const Source = MetaType(
 	"Class",
-	(name, { parents: [base] }) => {
+	(name, { parents: [base, ...rest] }) => {
 		return Constructor.Extend(
 			base,
-			name
+			`${ name }<${ base.name },${ rest.map(({ name }) => name).join(',') }>`
 		);
 	}
 );

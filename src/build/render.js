@@ -1,4 +1,4 @@
-import { view_prototype } from "../types/object.js";
+import { view, view_prototype } from "../types/object.js";
 import { diff } from "../io/path.js";
 import is from "../utils/is.js";
 
@@ -7,7 +7,6 @@ import MetaDescriptor from "../descriptors/meta.js";
 import { Get } from "../descriptors/accessor.js";
 import { GetDescriptor } from "../descriptors/getter.js";
 import ClassDescriptor from "../descriptors/class.js";
-import { MetaType } from "../gem.js";
 
 import tagify, { parse_args, parse_returns } from "../utils/tagify.js";
 
@@ -29,6 +28,13 @@ const STATIC_IGNORES = [
 	'constructor',
 	'static',
 	'defines',
+
+	'prescriptor',
+	'parents',
+	'defaults',
+	'properties',
+	'listeners',
+	'prototype',
 ];
 const METHOD_OVERRIDES = [
 	'constructor',
@@ -54,7 +60,6 @@ const TYPE_CONVERSIONS = {
  * @param    {string}  js_path     Path to the js file
  * @param    {string}  source      Source code of the js file
  * @param    {ClassDescriptor}  T  The default export from the js file
- * @param    {string}  dts         Definition code for the js file
  * @returns  {string}  Rendered .d.ts file
  */
 export default (
@@ -63,12 +68,15 @@ export default (
 	js_path,
 	source,
 	T,
-	dts
+	// dts
 ) => {
+	if (!is.class(T))
+		return "// THIS FILE HAS FAILED TO EXPORT A DEFAULT GEM TYPE.";
+
 	const {
 		name,
-		constructor,
-		__proto__,
+		// constructor,
+		// __proto__,
 	} = T;
 	return `${
 		render_notice(
@@ -80,17 +88,7 @@ export default (
 	}${ NEWLINE }${
 		render_imports(source)
 	}${ NEWLINE.repeat(2) }${
-		constructor === MetaType ||
-		constructor.name !== __proto__.name ?
-			render_type(T) + NEWLINE + `export default ${ name };` :
-			render_type(__proto__) + NEWLINE + dts.replace(
-				`class ${ name }`,
-				`class ${
-					name
-				} extends ${
-					__proto__.name ?? 'Object'
-				}`
-			)
+		render_type(T) + NEWLINE + `export default ${ name };`
 	}`;
 }
 
@@ -105,7 +103,7 @@ export const render_notice = (
 	(name => name == "Function" ? 'class' : name)(T.constructor.name)
 }::${
 	(parents => parents ? parents : T.__proto__.name || 'Object')(
-		T.parents?.map(({ name }) => name).join('|')
+		T.parents?.map(({ name }) => name).join('::')
 	)
 }
  * 💾 Generated on ${
@@ -280,15 +278,15 @@ export const render_method = (
 	}${ TAB } */${ NEWLINE }${ TAB }${ static_label }${
 		key
 	}${ GROUP_START }${
-		key === 'super' ?
-			`...arg_collection: [${
-				T.parents?.filter(
-					p => p !== T.__proto__
-				)
-				.map(
-					p => `[${ p.prototype.init ? render_params(p.prototype.init) : '{}' }]`
-				) ?? ''
-			}]` : 
+		// key === 'super' ?
+		// 	`...arg_collection: [${
+		// 		T.parents?.filter(
+		// 			p => p !== T.__proto__
+		// 		)
+		// 		.map(
+		// 			p => `[${ p.prototype.init ? render_params(p.prototype.init) : '{}' }]`
+		// 		).join(',') ?? ''
+		// 	}]` : 
 			render_params(method)
 	}${ GROUP_END }: ${ render_type_name(rtrns) }`;
 }
@@ -321,8 +319,13 @@ export const render_params =
 export const render_type_name = type_name => TYPE_CONVERSIONS[type_name] ?? type_name;
 
 export const render_statics = T => {
+	if (
+		T.constructor === T.__proto__.constructor
+	) {
+		return render_statics(T.__proto__);
+	}
 	const statics = Object.entries(
-		T
+		view(T)
 	)
 		.filter(
 			([key]) => !STATIC_IGNORES.includes(key)

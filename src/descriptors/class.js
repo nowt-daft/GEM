@@ -1,5 +1,4 @@
 import {
-	init,
 	sort,
 	concat,
 	view,
@@ -192,8 +191,11 @@ export default class ClassDescriptor {
 					// be added as a DEFAULT...
 				}
 
-				if (is.method(value))
-					return key.startsWith(AT) ? LISTENER : METHOD;
+				if (
+					is.method(value)
+				) {
+					return is.string(key) && key.startsWith(AT) ? LISTENER : METHOD;
+				}
 
 				return (
 					is.literal(value) &&
