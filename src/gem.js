@@ -589,6 +589,8 @@ export const Abstract = MetaType(
 );
 
 /**
+ * @template Modeled
+ *
  * @description
  * Create a basic Model type.  a Model Type, once made, can construct
  * instance with or without the NEW keyword.  The constructor, by default,
@@ -615,7 +617,7 @@ export const Abstract = MetaType(
  *     date_enrolled: "2019-09-14", // <- will be parsed by Date
  *     gpa: 3.2
  * });
- * @type {TypeConstructor}
+ * @type {TypeConstructor<(init: Record<string><any>) => Modeled>}
  */
 export const Model = MetaType(
 	"Model",
@@ -661,6 +663,8 @@ export const Source = MetaType(
 );
 
 /**
+ * @template Interfaced
+ * @description
  * Create an Interface to be used for real-time data validation.
  *
  * @example
