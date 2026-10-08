@@ -230,6 +230,10 @@ export const render_methods =
 			view_prototype(T)
 		).filter(
 			([key]) => !HTML_CALLBACKS.includes(key)
+		).filter(
+			// TODO: This is a shit filter by the way... move this higher
+			// with a delete T.prototype.constructer if init exists...
+			([key]) => !T.prototype.init || key != 'constructor'
 		).map(
 			([
 				key,

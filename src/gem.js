@@ -247,7 +247,7 @@ export const PROTOTYPE = {
  * }} TypeConstructor
  */
 
-
+// change these to ALL take Classdescriptors...
 export class Constructor {
 	/**
 	 * @param    {string}  name  Name for the object constructor.
@@ -261,7 +261,8 @@ export class Constructor {
 						Object.create(
 							{
 								...constructor.prototype,
-								constructor
+								constructor,
+								// add init here...
 							},
 							constructor.properties
 						) :
@@ -289,6 +290,7 @@ export class Constructor {
 						...arg_collection
 					);
 				}
+				// This should have an automagic init as well... why the fuck not?
 			}
 		}[name];
 	}
@@ -311,6 +313,7 @@ export class Constructor {
 					construct(this, ...args);
 				}
 			}
+			// Add init() -> uses the parents... easy!
 		}[name];
 	}
 
