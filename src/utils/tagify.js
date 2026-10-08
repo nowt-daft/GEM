@@ -1,9 +1,11 @@
 import is from "./is.js";
 
-const NEWLINE = '\n';
-const ASSIGN = '=';
-const COMMA = ',';
-const SPACE = ' ';
+// const NEWLINE = '\n';
+// const ASSIGN = '=';
+// const COMMA = ',';
+// const SPACE = ' ';
+const CLASS = 'class';
+const CONSTRUCT = 'constructor';
 const LP = '(';
 const RP = ')';
 const ARROW = '=>';
@@ -17,7 +19,11 @@ const ARROW = '=>';
 export const parse_args = func => {
 	const source = func.toString?.() ?? '';
 	
+	const class_index = source.indexOf(CLASS);
 	let start = source.indexOf(LP);
+
+	if (class_index > -1 && class_index < start)
+		start = source.indexOf(LP, source.indexOf(CONSTRUCT) + CONSTRUCT.length)
 
 	if (start < 0)
 		return source

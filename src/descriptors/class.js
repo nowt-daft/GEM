@@ -32,12 +32,6 @@ import Fields from "./fields.js";
  * @typedef {import('./fields.js').Dictionary} Dictionary
  */
 
-/**
- * TODO: MIGRATE PROPERTIES_DESCRIPTOR and PROTOTYPE to GEM file.
- * perhaps.... it might JUST be PROTOTYPE that gets moved. It would
- * certainly be easier...
- */
-
 const AT = '@';
 const
 	PROPERTY = 0,
@@ -115,7 +109,6 @@ export default class ClassDescriptor {
 			Fields.to_descriptors(fields)
 		);
 		prototype = concat(
-			// PROTOTYPE,
 			...parents.map(
 				p => (
 					p == globalThis.HTMLElement || p == globalThis.Element
@@ -183,7 +176,10 @@ export default class ClassDescriptor {
 					if (
 						is.object_literal(value) &&
 						is.method(value.method) &&
-						is.class(value.returns)
+						(
+							is.object_literal(value.params) ||
+							is.class(value.returns)
+						)
 					)
 						return METHOD;
 

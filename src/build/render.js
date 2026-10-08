@@ -36,11 +36,6 @@ const STATIC_IGNORES = [
 	'listeners',
 	'prototype',
 ];
-const METHOD_OVERRIDES = [
-	'constructor',
-	'inherit',
-	'super'
-]
 
 const TYPE_CONVERSIONS = {
 	Boolean: "boolean",
@@ -260,9 +255,11 @@ export const render_method = (
 		key = 'constructor';
 
 	const rtrns =
-		METHOD_OVERRIDES.includes(key) ?
-			T.name :
-			(method?.returns?.name ?? parse_returns(method));
+		key === 'constructor' ?
+			'' :
+			(key == 'inherit' || key == 'super') ?
+				T.name :
+				(method?.returns?.name ?? parse_returns(method));
 
 	const method_name = `${ TAB } * @method ${ key }` + NEWLINE;
 	const description = render_doc('description', method.description);
@@ -288,7 +285,7 @@ export const render_method = (
 		// 		).join(',') ?? ''
 		// 	}]` : 
 			render_params(method)
-	}${ GROUP_END }: ${ render_type_name(rtrns) }`;
+	}${ GROUP_END }${ rtrns ? ': ' + render_type_name(rtrns) : '' }`;
 }
 
 /**

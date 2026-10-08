@@ -6,12 +6,8 @@ export default class C extends Compose(
 	[A, B]
 ) {
 	constructor() {
-		// this.super(
-		// 	{
-		// 		property: "Hello, World",
-		// 		value: 42
-		// 	},
-		// 	["Jane Doe", 16]
-		// );
+		super();
 	}
 }
+
+

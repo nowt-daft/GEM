@@ -186,7 +186,8 @@ export const PROTOTYPE = {
 		...arg_collection
 	) {
 		const type = this.constructor;
-		const parents = type.parents?.filter(p => p !== type.__proto__) ?? [];
+		const [_, parents] = type.parents ?? [];
+		// const parents = type.parents?.filter(p => p !== type.__proto__) ?? [];
 
 		if (arg_collection.length !== parents.length)
 			throw new MultiInheritError(type, parents, arg_collection);
@@ -216,6 +217,9 @@ export const PROTOTYPE = {
  */
 
 /**
+ * @template T
+ *
+ * @description
  * A Type Factory helps us define Types ad generate them.  This
  * means we can call this as a function and it will return a
  * kind of CONSTRUCTOR (be it a class or otherwise).
@@ -233,39 +237,16 @@ export const PROTOTYPE = {
  * If definition is absent, there must be:
  *     at least TWO parents.
  *
- * @overload
- * @param    {string|Name}  name  Name for the constructor to have
- * @param    {(new *)[]}    parents  Any parent types to extend/inherit.
- * @param    {object}       definition  Properties, methods, listeners, etc.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @param    {string|Name}  name  Name for the constructor to have
- * @param    {object}       definition  Properties, methods, listeners, etc.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @param    {string|Name}  name  Name for the constructor to have
- * @param    {(new *)[]}    parents Any parent types to extend/inherit.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @param    {(new *)[]}  parents Any parent types to extend/inherit.
- * @param    {object}     definition  Properties, methods, listeners, etc.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @param    {(new *)[]}  parents Any parent types to extend/inherit.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @param    {object}  definition  Properties, methods, listeners, etc.
- * @returns  {new *}  Defined constructor/class.
- *//**
- * @overload
- * @returns  {new *}  Generic Constructor/class.
+ * @typedef {{
+ * (name: string|Name, parents: Array<new *>, definition: Record<string,any>) => new T
+ * (name: string|Name, definition: Record<string,any>) => new T
+ * (parents: Array<new *>, definition: Record<string,any>) => new T
+ * (name: string|Name, parents: Array<new *>) => new T
+ * (definition: Record<string,any>) => new T
+ * (parents: Array<new *>) => new T
+ * }} TypeConstructor
  */
-function TypeConstructor() {};
+
 
 export class Constructor {
 	/**
@@ -274,7 +255,7 @@ export class Constructor {
 	 */
 	static Object(name) {
 		const constructor = {
-			[name]: function(...args) {
+			[name]: function(init = {}) {
 				return construct(
 					is.global(this) ?
 						Object.create(
@@ -285,7 +266,7 @@ export class Constructor {
 							constructor.properties
 						) :
 						this,
-					...args
+					...arguments
 				);
 			}
 		}[name];
@@ -323,8 +304,10 @@ export class Constructor {
 	) {
 		return {
 			[name]: class extends base {
-				constructor(...args) {
-					super(...args);
+				constructor(...args_collection) {
+					const [base_args, ...rest_args_collection] = args_collection;
+					super(...base_args);
+					this.super(...rest_args_collection);
 					construct(this, ...args);
 				}
 			}
@@ -531,7 +514,7 @@ export function MetaType(
 		}
 	}[meta_name];
 
-	/** @type {TypeConstructor} */
+	/** @type {TypeConstructor<TypeBuilder>} */
 	return Object.defineProperties(
 		Gemify(TypeBuilder),
 		Properties.fixed(
@@ -544,6 +527,9 @@ export function MetaType(
 }
 
 /**
+ * @template Composed
+ *
+ * @description
  * Generate a GENERIC Type. Creates a class that can
  * inherit multiple parents via *composition*.
  *
@@ -563,20 +549,29 @@ export function MetaType(
  *         // THE REST OF THE CODE GOES HERE...
  *     }
  * }
- * @type {TypeConstructor}
+ * @type {TypeConstructor<(...args_collection: any[][]) => Composed>}
  */
 export const Compose = MetaType(
 	"Compose",
-	(_, { parents }) => Constructor.Class(`Compose<${ parents.map(({ name }) => name).join(',') }>`)
+	(
+		_,
+		{ parents }
+	) =>
+		Constructor.Class(
+			`Compose<${ parents.map(({ name }) => name).join(',') }>`
+		)
 );
 
 /**
+ * @template Abstracted
+ *
+ * @description
  * Create an Abstract.  Not to be constructed directly but inherited by a
  * child class or defined/exported as a inheritable class.
  *
  * @example
  * export default Abstract(
- *     "IEventDispatcher",
+ *     "EventDispatcher",
  *     {
  *         listen(listener) {
  *             // ...
@@ -586,7 +581,7 @@ export const Compose = MetaType(
  *         }
  *     }
  * );
- * @type {TypeConstructor}
+ * @type {TypeConstructor<() => Abstracted>}
  */
 export const Abstract = MetaType(
 	"Abstract",
@@ -594,6 +589,7 @@ export const Abstract = MetaType(
 );
 
 /**
+ * @description
  * Create a basic Model type.  a Model Type, once made, can construct
  * instance with or without the NEW keyword.  The constructor, by default,
  * accepts objects to use as a collection of key-value pairs to assign to the
@@ -627,6 +623,9 @@ export const Model = MetaType(
 );
 
 /**
+ * @template Sourced
+ *
+ * @description
  * Generate a Class Type. Directly extends the first parent
  * and then inherits through composition from the rest.
  *
@@ -642,12 +641,14 @@ export const Model = MetaType(
  *     }
  * ) {
  *     constructor() {
- *         super(...arguments_to_pass_to_A);
- *         this.inherit(SuperClassB, ...args_to_pass_to_b);
+ *         super(
+ *             [...arguments_to_pass_to_A],
+ *             [...args_for_class_b],
+ *             [...etc]
+ *         );
  *     }
- *     // ...rest of code here
  * }
- * @type {TypeConstructor}
+ * @type {TypeConstructor<(...args_collection: any[][]) => Sourced>}
  */
 export const Source = MetaType(
 	"Class",
