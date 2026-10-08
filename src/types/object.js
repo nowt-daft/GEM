@@ -236,7 +236,7 @@ export const view = Object.view =
 		ignore_list = [
 			'__proto__',
 			// 'constructor',
-			'init',
+			// 'init',
 			// 'inherit',
 			// 'super',
 			...ignore_list

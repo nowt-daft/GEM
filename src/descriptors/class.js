@@ -112,7 +112,7 @@ export default class ClassDescriptor {
 			...parents.map(
 				p => (
 					p == globalThis.HTMLElement || p == globalThis.Element
-				) ? {} : view(p.prototype ?? {})
+				) ? {} : view(p.prototype ?? {}, ['init'])
 			),
 			prototype
 		);

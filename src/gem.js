@@ -25,6 +25,9 @@ import MultiInheritError from "./errors/multi_inherit.js";
 
 import bootstrap from "./misc/bootstrap.js";
 
+// TODO:
+// This should go back to Fields?
+// Or, ClassDescriptor.sort...
 const to_descriptors = (
 	key,
 	value,
@@ -247,22 +250,53 @@ export const PROTOTYPE = {
  * }} TypeConstructor
  */
 
-// change these to ALL take Classdescriptors...
 export class Constructor {
 	/**
 	 * @param    {string}  name  Name for the object constructor.
+	 * @param    {(new *)[]} parents  class to directly extend.
+	 * @param    {import("./descriptors/fields.js").FieldDescriptors} prescriptor  class to directly extend.
+	 * @param    {import("./descriptors/class.js").Prototype} prototype  class to directly extend.
 	 * @returns  {new *}   Constructor for building objects.
 	 */
-	static Object(name) {
+	static Object(
+		name,
+		_,
+		prescriptor,
+		prototype
+	) {
+		if (!prototype.init) {
+			prototype.init = {
+				params: {
+					// TODO: maybe I should do an Interface... then write
+					// a renderer for Interfaces... makes the most sense...
+					init: map(
+						prescriptor,
+						(
+							param,
+							{ type, is_required, is_nullable }
+						) => [
+							`${ param }${ is_required ? '*' : is_nullable ? '?' : '' }`,
+							type
+						]
+					)
+				},
+				method(init = {}) {
+					Object.assign(
+						this,
+						init
+					);
+				}
+			}
+		}
 		const constructor = {
 			[name]: function(init = {}) {
 				return construct(
 					is.global(this) ?
 						Object.create(
 							{
+								...prototype,
 								...constructor.prototype,
 								constructor,
-								// add init here...
 							},
 							constructor.properties
 						) :
@@ -276,6 +310,9 @@ export class Constructor {
 
 	/**
 	 * @param    {string}  name  Name for the class to have.
+	 * @param    {(new *)[]} parents  class to directly extend.
+	 * @param    {import("./descriptors/fields.js").FieldDescriptors} prescriptor  class to directly extend.
+	 * @param    {import("./descriptors/class.js").Prototype} prototype  class to directly extend.
 	 * @returns  {new *}   Class for building objects.
 	 */
 	static Class(name) {
@@ -296,13 +333,17 @@ export class Constructor {
 	}
 
 	/**
-	 * @param    {new *}   base   Base class to directly extend.
-	 * @param    {string}  name   Name for the child class to have.
+	 * @param    {string}    name  Name for the child class to have.
+	 * @param    {(new *)[]} parents  class to directly extend.
+	 * @param    {import("./descriptors/fields.js").FieldDescriptors} prescriptor  class to directly extend.
+	 * @param    {import("./descriptors/class.js").Prototype} prototype  class to directly extend.
 	 * @returns  {new *}  Class for building objects.
 	 */
 	static Extend(
-		base,
-		name
+		name,
+		[base, ...rest],
+		prescriptor,
+		prototype
 	) {
 		return {
 			[name]: class extends base {
@@ -558,10 +599,13 @@ export const Compose = MetaType(
 	"Compose",
 	(
 		_,
-		{ parents }
+		{ parents, prescriptor, prototype }
 	) =>
 		Constructor.Class(
-			`Compose<${ parents.map(({ name }) => name).join(',') }>`
+			`Compose<${ parents.map(({ name }) => name).join(',') }>`,
+			parents,
+			prescriptor,
+			prototype
 		)
 );
 
@@ -624,7 +668,16 @@ export const Abstract = MetaType(
  */
 export const Model = MetaType(
 	"Model",
-	name => Constructor.Object(name)
+	(
+		name,
+		{ parents, prescriptor, prototype }
+	) =>
+		Constructor.Object(
+			name,
+			parents,
+			prescriptor,
+			prototype
+		)
 );
 
 /**
@@ -657,10 +710,13 @@ export const Model = MetaType(
  */
 export const Source = MetaType(
 	"Class",
-	(name, { parents: [base, ...rest] }) => {
+	(name, { parents, prescriptor, prototype }) => {
+		const [base] = parents;
 		return Constructor.Extend(
-			base,
-			`${ name }<${ base.name },${ rest.map(({ name }) => name).join(',') }>`
+			`${ name }<${ base.name },${ rest.map(({ name }) => name).join(',') }>`,
+			parents,
+			prescriptor,
+			prototype
 		);
 	}
 );

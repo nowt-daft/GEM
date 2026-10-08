@@ -224,23 +224,23 @@ export const render_field = (
  * @param    {ClassDescriptor}  T  The type from which to parse the prototype
  * @returns  {string}  The rendered methods that exists on the prototype
  */
-export const render_methods =
-	T =>
-		Object.entries(
-			view_prototype(T)
-		).filter(
-			([key]) => !HTML_CALLBACKS.includes(key)
-		).filter(
-			// TODO: This is a shit filter by the way... move this higher
-			// with a delete T.prototype.constructer if init exists...
-			([key]) => !T.prototype.init || key != 'constructor'
-		).map(
-			([
-				key,
-				method
-			]) =>
-				`${ render_method(T, key, method) };`
-		).join(NEWLINE);
+export const render_methods = T => {
+	const proto = view_prototype(T);
+	if (proto.init)
+		delete proto.constructor;
+
+	return Object.entries(
+		proto
+	).filter(
+		([key]) => !HTML_CALLBACKS.includes(key)
+	).map(
+		([
+			key,
+			method
+		]) =>
+			`${ render_method(T, key, method) };`
+	).join(NEWLINE);
+}
 
 /**
  * @param    {ClassDescriptor}  T
