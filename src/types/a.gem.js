@@ -4,6 +4,6 @@ export default Model(
 	"A",
 	{
 		property: String,
-		value: Number
+		"value?": Number
 	}
 );

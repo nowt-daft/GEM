@@ -267,17 +267,14 @@ export class Constructor {
 		if (!prototype.init) {
 			prototype.init = {
 				params: {
-					// TODO: maybe I should do an Interface... then write
-					// a renderer for Interfaces... makes the most sense...
-					init: map(
-						prescriptor,
-						(
-							param,
-							{ type, is_required, is_nullable }
-						) => [
-							`${ param }${ is_required ? '*' : is_nullable ? '?' : '' }`,
-							type
-						]
+					init: Interface(
+						({ prescriptor }) => `{${
+							Object.entries(prescriptor).map(
+								([param, { type, is_nullable }]) =>
+									`${ param + (is_nullable ? '?' : '') }:${ tagify(type) }`
+							).join(',')
+						}}`,
+						prescriptor
 					)
 				},
 				method(init = {}) {
@@ -488,7 +485,7 @@ export function MetaType(
 			const constructor =
 				constructor_format(
 					is.lamda(name) ?
-						name({ parents, prescriptor }) :
+						name({ parents, prescriptor, prototype }) :
 						name,
 					{
 						parents,
