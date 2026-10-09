@@ -237,8 +237,6 @@ export const view = Object.view =
 			'__proto__',
 			// 'constructor',
 			// 'init',
-			// 'inherit',
-			// 'super',
 			...ignore_list
 		];
 		return filter(
