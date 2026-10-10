@@ -1,0 +1,16 @@
+{
+	"imports": {
+		"zed": "./exports/zed.js",
+		"zed/descriptors": "./exports/descriptors/zed.js",
+		"zed/types": "./exports/types/zed.js",
+
+		"zed/utils": "./exports/utils.js",
+		"zed/maths": "./exports/maths.js",
+
+		"zui": "./exports/zui.js",
+		"zui/descriptors": "./exports/descriptors/zui.js",
+		"zui/types": "./exports/types/zui.js",
+
+		"zui/components": "./exports/components.js"
+	}
+}

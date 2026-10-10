@@ -1,0 +1,14 @@
+[
+	{
+		"id": 0,
+		"date_created": "2024-04-28T20:10:20.118Z",
+		"date_modified": "2024-04-28T20:10:20.118Z",
+		"name": "First Division"
+	},
+	{
+		"id": 1,
+		"date_created": "2024-04-29T16:01:59.432Z",
+		"date_modified": "2024-04-29T16:01:59.432Z",
+		"name": "Second Division"
+	}
+]

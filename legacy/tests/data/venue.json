@@ -1,0 +1,38 @@
+[
+	{
+		"id": 4,
+		"date_created": "2024-04-11T15:07:16.886Z",
+		"date_modified": "2024-04-11T15:07:16.886Z",
+		"name": "The Bar",
+		"street": "123 Fake Street",
+		"town": "Bordertown",
+		"code": "TD9 9JL"
+	},
+	{
+		"id": 1,
+		"date_created": "2024-04-11T15:07:16.895Z",
+		"date_modified": "2024-04-11T15:07:16.895Z",
+		"name": "High Street Pub",
+		"street": "456 High Street",
+		"town": "Bankshielsburn",
+		"code": "TD7 3QW"
+	},
+	{
+		"id": 2,
+		"date_created": "2024-04-11T15:18:12.284Z",
+		"date_modified": "2024-04-11T15:18:12.284Z",
+		"name": "Steamboats",
+		"street": "789 Eerie Lane",
+		"town": "Nowtlaw",
+		"code": "TD5 8JR"
+	},
+	{
+		"id": 3,
+		"date_created": "2024-04-11T15:19:56.628Z",
+		"date_modified": "2024-04-11T15:19:56.628Z",
+		"name": "AYE BEEN",
+		"street": "101 Hawick Crescent",
+		"town": "Bookyton",
+		"code": "TD6 1TD"
+	}
+]

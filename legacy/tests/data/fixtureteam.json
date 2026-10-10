@@ -1,0 +1,18 @@
+[
+	{
+		"id": 0,
+		"date_created": "2024-05-07T17:28:50.118Z",
+		"date_modified": "2024-05-07T17:28:50.118Z",
+		"fixture_id": 0,
+		"team_id": 1,
+		"hosting": true
+	},
+	{
+		"id": 1,
+		"date_created": "2024-05-07T17:28:50.121Z",
+		"date_modified": "2024-05-07T17:28:50.121Z",
+		"fixture_id": 0,
+		"team_id": 5,
+		"hosting": false
+	}
+]

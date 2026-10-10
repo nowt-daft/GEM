@@ -1,0 +1,98 @@
+[
+	{
+		"id": 0,
+		"date_created": "2024-05-14T23:55:20.879Z",
+		"date_modified": "2024-05-14T23:55:20.879Z",
+		"frame_id": 0,
+		"player_id": 0,
+		"point": 0
+	},
+	{
+		"id": 1,
+		"date_created": "2024-05-14T23:55:20.885Z",
+		"date_modified": "2024-05-14T23:55:20.919Z",
+		"frame_id": 0,
+		"player_id": 32,
+		"point": 1
+	},
+	{
+		"id": 2,
+		"date_created": "2024-05-14T23:59:26.371Z",
+		"date_modified": "2024-05-14T23:59:26.392Z",
+		"frame_id": 1,
+		"player_id": 1,
+		"point": 1
+	},
+	{
+		"id": 3,
+		"date_created": "2024-05-14T23:59:26.376Z",
+		"date_modified": "2024-05-14T23:59:26.397Z",
+		"frame_id": 1,
+		"player_id": 33,
+		"point": 0
+	},
+	{
+		"id": 4,
+		"date_created": "2024-05-14T23:59:39.673Z",
+		"date_modified": "2024-05-14T23:59:39.703Z",
+		"frame_id": 2,
+		"player_id": 2,
+		"point": 1
+	},
+	{
+		"id": 5,
+		"date_created": "2024-05-14T23:59:39.679Z",
+		"date_modified": "2024-05-14T23:59:39.698Z",
+		"frame_id": 2,
+		"player_id": 34,
+		"point": 0
+	},
+	{
+		"id": 6,
+		"date_created": "2024-05-15T00:03:11.207Z",
+		"date_modified": "2024-05-15T00:03:11.220Z",
+		"frame_id": 3,
+		"player_id": 3,
+		"point": 1
+	},
+	{
+		"id": 7,
+		"date_created": "2024-05-15T00:03:11.213Z",
+		"date_modified": "2024-05-15T00:03:11.221Z",
+		"frame_id": 3,
+		"player_id": 35,
+		"point": 0
+	},
+	{
+		"id": 8,
+		"date_created": "2024-05-15T00:03:19.412Z",
+		"date_modified": "2024-05-15T00:03:19.429Z",
+		"frame_id": 4,
+		"player_id": 4,
+		"point": 0
+	},
+	{
+		"id": 9,
+		"date_created": "2024-05-15T00:03:19.416Z",
+		"date_modified": "2024-05-15T00:03:19.426Z",
+		"frame_id": 4,
+		"player_id": 36,
+		"point": 1
+	},
+	{
+		"id": 10,
+		"date_created": "2024-05-15T00:03:34.853Z",
+		"date_modified": "2024-05-15T00:03:34.871Z",
+		"frame_id": 5,
+		"player_id": 5,
+		"point": 0
+	},
+	{
+		"id": 11,
+		"date_created": "2024-05-15T00:03:34.857Z",
+		"date_modified": "2024-05-15T00:03:34.868Z",
+		"frame_id": 5,
+		"player_id": 37,
+		"point": 1
+	}
+]
