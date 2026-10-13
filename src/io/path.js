@@ -31,12 +31,15 @@ export const normalise =
 
 export const join = (
 	...paths
-) => paths
+) => normalise(
+	paths
 		.map(normalise)
+		.map(x => x ? x : './')
 		.join(SLASH)
 		.replace(DBL_SLASH, SLASH)
 		.replace(UP, EMPTY)
-		.replace(HERE, EMPTY);
+		.replace(HERE, EMPTY)
+);
 
 /**
  * @param    {string}  root_path  The "higher-up" or "containing" directory path.

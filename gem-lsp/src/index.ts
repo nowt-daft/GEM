@@ -20,13 +20,24 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 
 			let child = build(PROJECT_DIR, BUILD_SCRIPT);
 
-			setInterval(
-				() => {
-					child.kill();
-					child = build(PROJECT_DIR, BUILD_SCRIPT);
-				},
-				20000
-			);
+			// setInterval(
+			// 	() => {
+			// 		child.on(
+			// 			'exit',
+			// 			() => child = build(PROJECT_DIR, BUILD_SCRIPT)
+			// 		);
+			// 		child.kill('SIGTERM');
+			//
+			// 		setTimeout(
+			// 			() => {
+			// 				if (!child.killed)
+			// 					child?.kill('SIGKILL');
+			// 			},
+			// 			5000
+			// 		);
+			// 	},
+			// 	600000
+			// );
 		}
 	);
 }

@@ -7,7 +7,7 @@ function PUBLISH::gem-cleanup {
 		if [ -d $node ]; then
 			PUBLISH::gem-cleanup $node
 		elif [[ $node == *.gem.d.ts ]] && [ ! -f ${node/.d.ts/.js} ]; then
-			echo "[DELETE :: SOURCE D.N.E] $node"
+			echo "[DELETE] $node"
 			rm $node
 		fi
 	done

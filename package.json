@@ -17,5 +17,5 @@
     "jst": "github:nowt-daft/jst",
     "termite": "github:nowt-daft/termite"
   },
-  "trustedDependencies": ["jst"]
+  "trustedDependencies": ["jst", "gem-lsp"]
 }
