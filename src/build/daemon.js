@@ -63,6 +63,15 @@ const convert = path => {
 	);
 }
 
+const get_source_path = (path, out) =>
+	path.replace(
+		GEM_DTS_EXT,
+		GEM_JS_EXT
+	).replace(
+		`${ out }/`,
+		''
+	);
+
 /**
  * @param  {string}  project_dir
  * @param  {RegExp[]}  include_dirs
@@ -70,9 +79,9 @@ const convert = path => {
  * @param  {string}  out_dir
  * @param  {string}  path
  * @param  {string[]}  output
- * @returns  {string[]}
+ * @returns  {Promise<string[]>}
  */
-const crawl = (
+const crawl = async (
 	project_dir,
 	include_dirs,
 	exclude_dirs,
@@ -89,7 +98,7 @@ const crawl = (
 		if (exclude_dirs.includes(node_path))
 			continue;
 
-		if (node.endsWith('/'))
+		if (node.endsWith('/')) {
 			output = crawl(
 				project_dir,
 				include_dirs,
@@ -98,13 +107,20 @@ const crawl = (
 				node_path,
 				output
 			);
-		
-		else if (
+		} else if (
+			node.endsWith(GEM_DTS_EXT) &&
 			include_dirs.some(
 				dir => dir.test(node_path)
 			)
-		)
-			output = output.concat(join(abs_path, node_path))
+		) {
+			const full_dts_path = join(abs_path, node_path);
+			console.log('  ->', node_path);
+
+			if (
+				await Bun.file(get_source_path(full_dts_path)).exists()
+			)
+				output = output.concat(full_dts_path);
+		}
 	}
 
 	return output;
@@ -113,7 +129,8 @@ const crawl = (
 const save = async (
 	project_dir,
 	path,
-	dts
+	dts,
+	out
 ) => {
 	print(
 		project_dir,
@@ -125,7 +142,7 @@ const save = async (
 	console.log('='.repeat(MAX_COL_WIDTH));
 
 	await Bun.write(path, dts);
-	await Bun.write(path.replace(TYPES_DIR, ''), dts);
+	await Bun.write(path.replace(`${ out }/`, ''), dts);
 }
 
 console.log(`
@@ -164,16 +181,18 @@ program(
 				['.git', 'node_modules', OUT_DIR]
 			);
 			
-			const DELETE_QUEUE = crawl(
+			const DELETE_QUEUE = await crawl(
 				project_dir,
 				INCLUDES_REGEX,
 				EXCLUDES,
 				OUT_DIR
 			);
 
+			console.log('+'.repeat(MAX_COL_WIDTH));
 			console.log(
 				DELETE_QUEUE.join('\n')
 			);
+			console.log('+'.repeat(MAX_COL_WIDTH));
 
 			setTimeout(
 				() => _time_passed = true,
@@ -194,14 +213,7 @@ program(
 			);
 		}
 
-		const js_path =
-			path.replace(
-				GEM_DTS_EXT,
-				GEM_JS_EXT
-			).replace(
-				`${ OUT_DIR }/`,
-				''
-			);
+		const js_path = get_source_path(path, OUT_DIR);
 
 		dts = render(
 			project_dir,
@@ -215,7 +227,8 @@ program(
 		await save(
 			project_dir,
 			path,
-			dts
+			dts,
+			OUT_DIR
 		);
 	}
 );

@@ -45,9 +45,9 @@ export default async (
 			code,
 			category,
 			messageText,
-			file: { fileName }
+			file = {}
 		}) => console.error(
-			`RUH ROH<${ code } :: ${ category }> @ ${ fileName }`,
+			`RUH ROH<${ code } :: ${ category }> @ ${ file.fileName ?? '[DNE]' }`,
 			ts.flattenDiagnosticMessageText(
 				messageText,
 				WATCH_INFO_FORMAT.getNewLine()
