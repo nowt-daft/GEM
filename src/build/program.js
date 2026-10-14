@@ -12,6 +12,7 @@ const WATCH_INFO_FORMAT = {
 	getCanonicalFileName: p => p
 }
 
+
 /**
  * @callback EmitHook
  * @param    {Record<string,any>}  config

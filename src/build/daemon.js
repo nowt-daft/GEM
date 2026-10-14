@@ -1,7 +1,6 @@
-import { list, open } from "../io/disk.js";
+import { list } from "../io/disk.js";
 import { diff, join } from "../io/path.js";
 import program from "./program.js";
-import render from "./render.js";
 
 const MAX_COL_WIDTH = 70;
 
@@ -215,14 +214,16 @@ program(
 
 		const js_path = get_source_path(path, OUT_DIR);
 
-		dts = render(
-			project_dir,
-			path,
-			js_path,
-			await open(js_path),
-			(await import(js_path)).default,
-			dts
-		);
+		dts = Bun.spawnSync({
+			cmd: [
+				"bun", "run", "--no-telemetry",
+				"--preload", `${ project_dir }/src/misc/dom.js`, // <- move to build (duh)
+				`${ project_dir }/src/build/render.js`,
+				project_dir,
+				path,
+				js_path
+			]
+		}).stdout.toString();
 		
 		await save(
 			project_dir,

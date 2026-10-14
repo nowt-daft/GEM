@@ -19,25 +19,6 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 			const BUILD_SCRIPT = `${ PROJECT_DIR }/BUILD`;
 
 			let child = build(PROJECT_DIR, BUILD_SCRIPT);
-
-			// setInterval(
-			// 	() => {
-			// 		child.on(
-			// 			'exit',
-			// 			() => child = build(PROJECT_DIR, BUILD_SCRIPT)
-			// 		);
-			// 		child.kill('SIGTERM');
-			//
-			// 		setTimeout(
-			// 			() => {
-			// 				if (!child.killed)
-			// 					child?.kill('SIGKILL');
-			// 			},
-			// 			5000
-			// 		);
-			// 	},
-			// 	600000
-			// );
 		}
 	);
 }

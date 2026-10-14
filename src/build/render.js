@@ -1,5 +1,6 @@
 import { view, view_prototype } from "../types/object.js";
 import { diff } from "../io/path.js";
+import { open } from "../io/disk.js";
 import is from "../utils/is.js";
 
 import { FixedProperty } from "../descriptors/property.js";
@@ -8,7 +9,15 @@ import { Get } from "../descriptors/accessor.js";
 import { GetDescriptor } from "../descriptors/getter.js";
 import ClassDescriptor from "../descriptors/class.js";
 
-import tagify, { parse_args, parse_returns } from "../utils/tagify.js";
+import { parse_args, parse_returns } from "../utils/tagify.js";
+
+
+const [
+	project_dir,
+	path,
+	js_path
+] = process.argv.slice(2);
+
 
 const TAB = '\t';
 const NEWLINE = '\n';
@@ -57,7 +66,7 @@ const TYPE_CONVERSIONS = {
  * @param    {ClassDescriptor}  T  The default export from the js file
  * @returns  {string}  Rendered .d.ts file
  */
-export default (
+export const render = (
 	root_path,
 	dts_path,
 	js_path,
@@ -279,16 +288,7 @@ export const render_method = (
 	}${ TAB } */${ NEWLINE }${ TAB }${ static_label }${
 		key
 	}${ GROUP_START }${
-		// key === 'super' ?
-		// 	`...arg_collection: [${
-		// 		T.parents?.filter(
-		// 			p => p !== T.__proto__
-		// 		)
-		// 		.map(
-		// 			p => `[${ p.prototype.init ? render_params(p.prototype.init) : '{}' }]`
-		// 		).join(',') ?? ''
-		// 	}]` : 
-			render_params(method)
+		render_params(method)
 	}${ GROUP_END }${ rtrns ? ': ' + render_type_name(rtrns) : '' }`;
 }
 
@@ -348,10 +348,22 @@ export const render_statics = T => {
 						TAB
 					}static ${
 						render_field(key, field)
-					// } = ${
-					// 	tagify(value)
 					};`
 				);
 			}
 	).join(NEWLINE);
+}
+
+export default render;
+
+if (project_dir && path && js_path) {
+	console.log(
+		render(
+			project_dir,
+			path,
+			js_path,
+			await open(js_path),
+			(await import(js_path)).default
+		)
+	);
 }
