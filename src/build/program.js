@@ -23,19 +23,29 @@ const WATCH_INFO_FORMAT = {
  */
 
 /**
+ * @callback DeleteHook
+ * @param    {Record<string,any>}  config
+ * @returns  {void}
+ *
+ */
+
+/**
  * @param   {string}  project_dir
  * @param   {EmitHook} emit_hook
+ * @param   {DeleteHook} del_hook
  * @returns {ts.WatchCompilerHostOfConfigFile<ts.EmitAndSemanticDiagnosticsBuilderProgram>}
  */
 export default async (
 	project_dir = ts.sys.getCurrentDirectory(),
-	emit_hook
+	emit_hook,
+	del_hook
 ) => {
 	const config_file = ts.findConfigFile(
 		project_dir,
 		ts.sys.fileExists,
 		"tsconfig.json"
 	);
+	const config = await Bun.file(config_file).json();
 
 	const host = ts.createWatchCompilerHost(
 		config_file,
@@ -47,17 +57,22 @@ export default async (
 			category,
 			messageText,
 			file = {}
-		}) => console.error(
-			`RUH ROH<${ code } :: ${ category }> @ ${ file.fileName ?? '[DNE]' }`,
-			ts.flattenDiagnosticMessageText(
-				messageText,
-				WATCH_INFO_FORMAT.getNewLine()
-			)
-		),
+		}) => {
+			if (!file.fileName) {
+				console.error(`[DELETED] ${ code }`);
+				del_hook(config);
+				return;
+			}
+			console.error(
+				`RUH ROH<${ code } :: ${ category }> @ ${ file.fileName }`,
+				ts.flattenDiagnosticMessageText(
+					messageText,
+					WATCH_INFO_FORMAT.getNewLine()
+				)
+			);
+		},
 		() => void 0
 	);
-
-	const config = await Bun.file(config_file).json();
 	
 	host.writeFile = (
 		path,

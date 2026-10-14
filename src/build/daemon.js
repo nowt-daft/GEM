@@ -9,7 +9,7 @@ const CHARS_TO_ESCAPE = /[.*+?^${}()|]/g;
 const GEM_JS_EXT = '.gem.js';
 const GEM_DTS_EXT = '.gem.d.ts';
 
-const WAIT_TIME = 10000;
+const WAIT_TIME = 60000;
 
 const [
 	runtime,
@@ -98,7 +98,7 @@ const crawl = async (
 			continue;
 
 		if (node.endsWith('/')) {
-			output = crawl(
+			output = await crawl(
 				project_dir,
 				include_dirs,
 				exclude_dirs,
@@ -112,17 +112,67 @@ const crawl = async (
 				dir => dir.test(node_path)
 			)
 		) {
-			const full_dts_path = join(abs_path, node_path);
-			console.log('  ->', node_path);
+			const full_dts_path = join(abs_path, node);
+			const full_src_path = get_source_path(full_dts_path);
+			const full_out_path = join(project_dir, out_dir, node_path);
 
 			if (
-				await Bun.file(get_source_path(full_dts_path)).exists()
+				!(await Bun.file(full_src_path).exists())
 			)
 				output = output.concat(full_dts_path);
+			if (
+				!(await Bun.file(full_out_path).exists())
+			)
+				output = output.concat(full_out_path);
 		}
 	}
 
 	return output;
+}
+
+/**
+ * @param   {string}    project_dir
+ * @param   {string[]}  include
+ * @param   {string[]}  exclude
+ * @param   {string}    out
+ * @returns {void}
+ */
+const init_crawl = async (
+	project_dir,
+	include,
+	exclude,
+	out
+) => {
+	const OUT_DIR = out;
+	const INCLUDES_REGEX = include.map(
+		glob => convert(glob)
+	);
+	const EXCLUDES = exclude.concat(
+		['node_modules', OUT_DIR]
+	);
+	
+	const DELETE_QUEUE = await crawl(
+		project_dir,
+		INCLUDES_REGEX,
+		EXCLUDES,
+		OUT_DIR
+	);
+
+	console.log('!'.repeat(MAX_COL_WIDTH));
+	DELETE_QUEUE.forEach(
+		full_dts_path => {
+			console.log('- [DELETE]', full_dts_path);
+			del(full_dts_path);
+		}
+	);
+	console.log('!'.repeat(MAX_COL_WIDTH));
+}
+
+/**
+ * @param   {string}  full_path
+ */
+const del = full_path => {
+	return void Bun.file(full_path).delete();
 }
 
 const save = async (
@@ -173,25 +223,12 @@ program(
 		if (_time_passed) {
 			_time_passed = false;
 
-			const INCLUDES_REGEX = include.map(
-				glob => convert(glob)
-			);
-			const EXCLUDES = exclude.concat(
-				['.git', 'node_modules', OUT_DIR]
-			);
-			
-			const DELETE_QUEUE = await crawl(
+			init_crawl(
 				project_dir,
-				INCLUDES_REGEX,
-				EXCLUDES,
+				include,
+				exclude,
 				OUT_DIR
 			);
-
-			console.log('+'.repeat(MAX_COL_WIDTH));
-			console.log(
-				DELETE_QUEUE.join('\n')
-			);
-			console.log('+'.repeat(MAX_COL_WIDTH));
 
 			setTimeout(
 				() => _time_passed = true,
@@ -230,6 +267,18 @@ program(
 			path,
 			dts,
 			OUT_DIR
+		);
+	},
+	({
+		include = ['**/*'],
+		exclude = [],
+		compilerOptions: { outDir = '@types' }
+	}) => {
+		init_crawl(
+			project_dir,
+			include,
+			exclude,
+			outDir
 		);
 	}
 );

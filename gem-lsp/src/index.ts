@@ -2,6 +2,7 @@ import * as ts from 'typescript/lib/tsserverlibrary';
 import Plugin from './plugin';
 
 import { spawn } from "node:child_process";
+import { existsSync as exists } from "node:fs";
 
 function build(cwd: string, script: string) {
 	return spawn(
@@ -16,7 +17,12 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 		plugin => {
 			const PROJECT_DIR =
 				plugin.project.getCurrentDirectory();
-			const BUILD_SCRIPT = `${ PROJECT_DIR }/BUILD`;
+			const GEM_DIR = `${ PROJECT_DIR }/node_modules/GEM`;
+			const BUILD_SCRIPT = `${
+				exists(GEM_DIR) ?
+					GEM_DIR :
+					PROJECT_DIR
+			}/BUILD`;
 
 			let child = build(PROJECT_DIR, BUILD_SCRIPT);
 		}

@@ -783,7 +783,10 @@ export const List = MetaType(
 	}
 );
 
-export const Either = MetaType(
+/**
+ * @deprecated
+ */
+export const Eithe = MetaType(
 	'T|U|...|V',
 	(
 		_,
@@ -806,6 +809,25 @@ export const Either = MetaType(
 		}
 	}
 );
+
+/**
+ * @param   {(new *)[]}  types
+ * @returns {new *}
+ */
+export const Either = (
+	...types
+) => {
+	const name = `${ types.map(({ name }) => name).join('|') }`;
+	return {
+		[name]: class extends Abstract {
+			static defines(instance) {
+				return types.some(
+					t => is.of_type(instance, t)
+				);
+			}
+		}
+	}[name]
+}
 
 export const Tuple = MetaType(
 	`[...T]`,
@@ -830,7 +852,7 @@ export const Tuple = MetaType(
 export const Options = (
 	...values
 ) => {
-	const name = `[${ values.map(v => tagify(v)).join('|') }]`;
+	const name = `${ values.map(v => tagify(v)).join('|') }`;
 	return {
 		[name]: class extends Abstract {
 			static defines(instance) {
