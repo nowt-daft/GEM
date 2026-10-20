@@ -4,10 +4,13 @@ import Plugin from './plugin';
 import { spawn } from "node:child_process";
 import { existsSync as exists } from "node:fs";
 
-function build(cwd: string, script: string) {
+function build(cwd: string, gem_dir: string) {
 	return spawn(
-		script,
-		[],
+		`${ gem_dir }/BUILD`,
+		[
+			gem_dir,
+			cwd
+		],
 		{ cwd }
 	);
 }
@@ -18,13 +21,13 @@ function init({ typescript: _ }: { typescript: typeof ts }) {
 			const PROJECT_DIR =
 				plugin.project.getCurrentDirectory();
 			const GEM_DIR = `${ PROJECT_DIR }/node_modules/GEM`;
-			const BUILD_SCRIPT = `${
+
+			let child = build(
+				PROJECT_DIR,
 				exists(GEM_DIR) ?
 					GEM_DIR :
 					PROJECT_DIR
-			}/BUILD`;
-
-			let child = build(PROJECT_DIR, BUILD_SCRIPT);
+			);
 		}
 	);
 }

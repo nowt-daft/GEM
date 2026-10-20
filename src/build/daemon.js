@@ -14,7 +14,8 @@ const WAIT_TIME = 60000;
 const [
 	runtime,
 	script,
-	project_dir = process.env.PWD
+	project_dir = process.env.PWD,
+	gem_dir = project_dir
 ] = process.argv;
 
 let _time_passed = true;
@@ -254,8 +255,8 @@ program(
 		dts = Bun.spawnSync({
 			cmd: [
 				"bun", "run", "--no-telemetry",
-				"--preload", `${ project_dir }/src/misc/dom.js`, // <- move to build (duh)
-				`${ project_dir }/src/build/render.js`,
+				"--preload", `${ gem_dir }/src/misc/dom.js`,
+				`${ gem_dir }/src/build/render.js`,
 				project_dir,
 				path,
 				js_path

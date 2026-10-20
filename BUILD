@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-GEM_DIR=$PWD
-PROJECT_DIR=$PWD
-
-# ARE WE THE GEM PROJECT, OR ARE WE THE DEPENDENCY?
-if [ -d "$PWD/node_modules/GEM" ]; then
-	GEM_DIR=$PWD/node_modules/GEM
-fi
+GEM_DIR=${1:-$PWD}
+PROJECT_DIR=${2:-$PWD}
 
 echo "[STARTING] Build program and watch daemon..."
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
