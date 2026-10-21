@@ -267,7 +267,8 @@ export class Constructor {
 		if (!prototype.init) {
 			prototype.init = {
 				params: {
-					init: Interface(
+					init: Struct(
+						// Give this to all Structures/Interfaces with no name?
 						({ prescriptor }) => `{${
 							Object.entries(prescriptor).map(
 								([param, { type, is_nullable }]) =>
@@ -749,7 +750,6 @@ export const Interface = MetaType(
 					const value = object[key];
 					return is.defined(value) &&
 						is.of_type(value, descriptor.type);
-						// value instanceof descriptor.type;
 				}
 			);
 		}
@@ -786,7 +786,8 @@ export const Struct = MetaType(
 						return true;
 
 					const value = object[key];
-					return is.defined(value) && value instanceof descriptor.type;
+					return is.defined(value) &&
+						is.of_type(value, descriptor.type);
 				}
 			) && Object.entries(
 				object
