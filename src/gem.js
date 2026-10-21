@@ -721,7 +721,8 @@ export const Source = MetaType(
 /**
  * @template Interfaced
  * @description
- * Create an Interface to be used for real-time data validation.
+ * Create an Interface to be used for real-time data validation. Interface
+ * only has to be satisfied, does NOT need to be an exact match.
  *
  * @example
  * const Person = Interface({
@@ -730,8 +731,8 @@ export const Source = MetaType(
  *     "address?": String
  * });
  *
- * { name: "Jack", age: 32 } instanceof Person // -> TRUE
- * @type {TypeConstructor}
+ * { name: "Jack", age: 32, beans: "who cares?" } instanceof Person // -> TRUE
+ * @type {TypeConstructor<Interfaced>}
  */
 export const Interface = MetaType(
 	"Interface",
@@ -746,8 +747,51 @@ export const Interface = MetaType(
 						return true;
 
 					const value = object[key];
+					return is.defined(value) &&
+						is.of_type(value, descriptor.type);
+						// value instanceof descriptor.type;
+				}
+			);
+		}
+	}
+);
+
+/**
+ * @template Structured
+ * @description
+ * Create an object Strctureto be used for real-time data validation.
+ * Data must be an exact match, not merely satisifed.
+ *
+ * @example
+ * const Person = Struct({
+ *     "name*": String,
+ *     "age*": Number,
+ *     "address?": String
+ * });
+ *
+ * { name: "Jack", age: 32 } instanceof Person // -> TRUE
+ * { name: "Jack", age: 32, beans: "on toast?" } instanceof Person // -> FALSE
+ * @type {TypeConstructor<Structured>}
+ */
+export const Struct = MetaType(
+	"Structure",
+	name => Constructor.Abstract(name),
+	{
+		defines(object) {
+			return Object.entries(
+				this.prescriptor ?? {}
+			).every(
+				([key, descriptor]) => {
+					if (!descriptor.is_required)
+						return true;
+
+					const value = object[key];
 					return is.defined(value) && value instanceof descriptor.type;
 				}
+			) && Object.entries(
+				object
+			).every(
+				([key]) => Object.hasOwn(this.prescriptor, key)
 			);
 		}
 	}

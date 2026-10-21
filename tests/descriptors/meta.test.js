@@ -38,9 +38,9 @@ TestSuite.run(
 			expect(descriptor).toMatchObject(
 				{
 					type: Number,
-					key: '',
-					//get;
-					//set;
+					key: undefined,
+					//get; -> function
+					//set; -> function
 					value: 42,
 					is_nullable: false,
 					is_required: false,

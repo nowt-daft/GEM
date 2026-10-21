@@ -38,7 +38,8 @@ class B extends A {
 		super({
 			property: 69,
 			value: true,
-		}, values);
+			...values
+		});
 	}
 }
 
@@ -49,7 +50,7 @@ class C extends B {
 }
 
 class D extends Model(
-	C,
+	[C],
 	{
 		"name*": String,
 		"age?":  Number

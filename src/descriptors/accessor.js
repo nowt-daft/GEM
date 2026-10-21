@@ -57,17 +57,19 @@ export default class Accessor extends Descriptor {
 	}
 	
 	/**
+	 * @param    {string|symbol}  key
 	 * @param    {Getter}   get
 	 * @param    {boolean}  enumerable
 	 *
 	 * @returns  {Get}  Getter Accessor Descriptor object
 	 */
 	static Get(
+		key,
 		get,
 		enumerable = true
 	) {
 		return new Get(
-			undefined,
+			key,
 			get,
 			enumerable
 		);
@@ -101,6 +103,7 @@ export default class Accessor extends Descriptor {
 	}
 
 	/**
+	 * @param    {string|symbol}  key
 	 * @param    {Getter}  get
 	 * @param    {Setter}  set
 	 * @param    {boolean} enumerable
@@ -108,12 +111,13 @@ export default class Accessor extends Descriptor {
 	 * @returns  {Get}  Getter Accessor Descriptor object
 	 */
 	static GetSet(
+		key,
 		get,
 		set,
 		enumerable = true
 	) {
 		return new GetSet(
-			undefined,
+			key,
 			get,
 			set,
 			enumerable

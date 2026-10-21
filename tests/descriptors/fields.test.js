@@ -12,7 +12,7 @@ class FieldsTest extends TestSuite {
 		super(
 			"Fields Constructor from Properties",
 			(expect, [properties], fields) => {
-				expect(new Fields(properties)).toMatchObject(fields);
+				expect(Fields.create(properties)).toMatchObject(fields);
 			},
 			tests
 		);

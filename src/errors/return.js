@@ -14,9 +14,9 @@ export default class ReturnError extends GenericError {
 			}.${
 				method_name
 			}(...) should return a ${
-				expected_type.name
+				expected_type?.name ?? 'unknown'
 			} but returned a ${
-				received_type.name
+				received_type?.name ?? 'unknown'
 			}`
 		);
 	}

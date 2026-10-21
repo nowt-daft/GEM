@@ -107,7 +107,8 @@ export default function Method(
 
 			if (
 				ignore_return_check ||
-				rtrn instanceof returns
+				(is.undefined(rtrn) && is.undefined(returns)) ||
+				is.of_type(rtrn, returns)
 			)
 				return rtrn;
 

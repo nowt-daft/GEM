@@ -243,7 +243,7 @@ export default new class is extends TypeOf {
 	 * @returns  {boolean}   Is value of type?
 	 */
 	of_type(value, type) {
-		return this.type(value.constructor, type);
+		return this.type(value?.constructor, type);
 	}
 	/**
 	 * @param    {any}     that
