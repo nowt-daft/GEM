@@ -177,12 +177,12 @@ export default new class is extends TypeOf {
 	method(func) {
 		return (
 			this.function(func) && (
-				this.object_literal(func.params) ||
-				this.class(func.returns) || (
+				// this.object_literal(func.params) ||
+				// this.class(func.returns) || (
 					this.undefined(func.prototype) &&
 					func.name !== "" &&
 					func.toString().startsWith(func.name)
-				)
+				// )
 			)
 		);
 	}

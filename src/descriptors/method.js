@@ -34,7 +34,6 @@ export default function Method(
 		method,
 		returns = undefined
 	},
-	ignore_return_check = is.undefined(returns)
 ) {
 	const fields = Fields.create(params);
 
@@ -106,8 +105,9 @@ export default function Method(
 			);
 
 			if (
-				ignore_return_check ||
-				(is.undefined(rtrn) && is.undefined(returns)) ||
+				(
+					is.undefined(rtrn) && is.undefined(returns)
+				) ||
 				is.of_type(rtrn, returns)
 			)
 				return rtrn;

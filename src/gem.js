@@ -907,6 +907,10 @@ export const Options = (
 	}[name]
 };
 
+export const Hook = () => {
+
+}
+
 // TODO: FINISH ANY NECESSARY METATYPE AND TYPES
 // GET FILES FROM LAPTOP...
 export const Scalar = MetaType();
