@@ -13,6 +13,10 @@ import Properties from "./properties.js";
 
 const REST = "...";
 
+export class MethodDescriptor extends Broadcaster {
+
+}
+
 /**
  * @function  Method
  * @param     {string}                  name
